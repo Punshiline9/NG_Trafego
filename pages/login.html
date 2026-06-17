@@ -10,31 +10,74 @@
 </head>
 <body>
   <div class="login-container glass">
-    <img src="../assets/imagens/logo.png" alt="NG Logo"
-         onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-    <div style="display:none; color:#FFD700; font-size:2em;">⚜️</div>
+    <!-- Painel Esquerdo -->
+    <div class="login-painel-esquerdo">
+      <img src="../assets/imagens/logo.png" alt="NG Logo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <div style="display:none; color:#FFD700; font-size:2em;">⚜️</div>
 
-    <div class="form-toggle">
-      <span class="ativo" data-form="login">Login</span>
-      <span data-form="cadastro">Cadastro</span>
+      <div class="form-toggle">
+        <span class="ativo" data-form="login">Login</span>
+        <span data-form="cadastro">Cadastro</span>
+      </div>
+
+      <div id="formLogin" class="form-box">
+        <input type="text" id="userLogin" placeholder="Usuário ou email" autocomplete="username">
+        <div class="input-grupo">
+          <input type="password" id="senhaLogin" placeholder="Senha" autocomplete="current-password">
+          <span class="input-icone" id="toggleSenhaLogin" title="Mostrar senha">👁️</span>
+        </div>
+        <div class="lembrar-checkbox">
+          <input type="checkbox" id="lembrarLogin">
+          <label for="lembrarLogin">Lembrar-me</label>
+        </div>
+        <button class="btn" id="btnLogin">Entrar</button>
+        <a href="recuperacao.html" class="link-recuperar">Esqueci a senha</a>
+      </div>
+
+      <div id="formCadastro" class="form-box oculto">
+        <input type="text" id="nomeCad" placeholder="Nome completo">
+        <input type="email" id="emailCad" placeholder="Email">
+        <input type="text" id="userCad" placeholder="Usuário" autocomplete="off">
+        <div class="input-grupo">
+          <input type="password" id="senhaCad" placeholder="Senha" autocomplete="new-password">
+          <span class="input-icone" id="toggleSenhaCad" title="Mostrar senha">👁️</span>
+        </div>
+        <div class="forca-senha" id="forcaSenha"></div>
+        <button class="btn" id="btnCadastrar">Criar conta</button>
+      </div>
+
+      <div id="msgErro" class="erro"></div>
+
+      <div class="links-legais">
+        <a href="custom.html?id=termos">📄 Termos de Uso</a>
+        <span>|</span>
+        <a href="custom.html?id=privacidade">🔒 Privacidade</a>
+        <span>|</span>
+        <a href="custom.html?id=regras">📜 Regras</a>
+      </div>
     </div>
 
-    <div id="formLogin" class="form-box">
-      <input type="text" id="userLogin" placeholder="Usuário ou email" autocomplete="username">
-      <input type="password" id="senhaLogin" placeholder="Senha" autocomplete="current-password">
-      <button class="btn" id="btnLogin">Entrar</button>
-      <a href="recuperacao.html" class="link-recuperar">Esqueci a senha</a>
-    </div>
+    <!-- Painel Direito -->
+    <div class="login-painel-direito">
+      <div class="preview-icone">💰</div>
+      <h3>NG Tarefas</h3>
+      <p>Complete tarefas, acumule pontos e ganhe dinheiro real!</p>
+      
+      <div class="recursos-lista">
+        <div class="recurso-item"><span>✅</span> Tarefas verificadas</div>
+        <div class="recurso-item"><span>💸</span> Saques via WhatsApp</div>
+        <div class="recurso-item"><span>🏆</span> Pódio semanal</div>
+        <div class="recurso-item"><span>🛡️</span> 100% Seguro</div>
+      </div>
 
-    <div id="formCadastro" class="form-box oculto">
-      <input type="text" id="nomeCad" placeholder="Nome completo">
-      <input type="email" id="emailCad" placeholder="Email">
-      <input type="text" id="userCad" placeholder="Usuário" autocomplete="off">
-      <input type="password" id="senhaCad" placeholder="Senha" autocomplete="new-password">
-      <button class="btn" id="btnCadastrar">Criar conta</button>
+      <div class="contactos-info">
+        <p>📱 Suporte WhatsApp:</p>
+        <a href="https://wa.me/2449944669" target="_blank" class="contacto-link">+244 994 466 9</a>
+        <p style="margin-top:8px;">📧 Email:</p>
+        <a href="mailto:suporte@ngtrafego.com" class="contacto-link">suporte@ngtrafego.com</a>
+      </div>
     </div>
-
-    <div id="msgErro" class="erro"></div>
   </div>
 
   <div class="creditos">
@@ -52,6 +95,7 @@
       navigator.serviceWorker.register('../sw.js');
     }
 
+    // Toggle login/cadastro
     const spans = document.querySelectorAll('.form-toggle span');
     const formLogin = document.getElementById('formLogin');
     const formCadastro = document.getElementById('formCadastro');
@@ -68,17 +112,27 @@
       });
     });
 
+    // Toggle visibilidade senha
+    toggleVisibilidadeSenha('senhaLogin', 'toggleSenhaLogin');
+    toggleVisibilidadeSenha('senhaCad', 'toggleSenhaCad');
+
+    // Força da senha
+    atualizarForcaSenha('senhaCad', 'forcaSenha');
+
+    // Login
     document.getElementById('btnLogin').addEventListener('click', async () => {
       const user = document.getElementById('userLogin').value.trim();
       const senha = document.getElementById('senhaLogin').value;
+      const lembrar = document.getElementById('lembrarLogin').checked;
       msgErro.textContent = '';
       try {
-        await login(user, senha);
+        await login(user, senha, lembrar);
       } catch (e) {
         msgErro.textContent = e.message;
       }
     });
 
+    // Cadastro
     document.getElementById('btnCadastrar').addEventListener('click', async () => {
       const dados = {
         nome: document.getElementById('nomeCad').value.trim(),
@@ -92,6 +146,16 @@
         return;
       }
 
+      if (!validarEmail(dados.email)) {
+        msgErro.textContent = 'Email inválido.';
+        return;
+      }
+
+      if (dados.senha.length < 4) {
+        msgErro.textContent = 'Senha deve ter pelo menos 4 caracteres.';
+        return;
+      }
+
       const res = await api.cadastrar(dados);
       if (res.erro) {
         msgErro.textContent = res.erro;
@@ -102,8 +166,13 @@
       }
     });
 
+    // Enter para login
     document.getElementById('senhaLogin').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') document.getElementById('btnLogin').click();
+    });
+
+    document.getElementById('senhaCad').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btnCadastrar').click();
     });
   </script>
 </body>

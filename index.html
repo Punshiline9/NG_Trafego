@@ -7,11 +7,56 @@
   <link rel="stylesheet" href="css/comum.css">
   <link rel="manifest" href="manifest.json">
   <style>
-    body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #000; flex-direction: column; }
-    .splash { text-align: center; }
-    .splash img { width: 120px; animation: girar 2s linear infinite; }
-    @keyframes girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .splash p { color: #FFD700; margin-top: 20px; font-size: 1.2em; }
+    body { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      height: 100vh; 
+      background: #000; 
+      flex-direction: column; 
+      overflow: hidden;
+    }
+    .splash { 
+      text-align: center; 
+      animation: fadeIn 1s ease;
+    }
+    .splash img { 
+      width: 120px; 
+      animation: girar 2s linear infinite; 
+      filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));
+    }
+    @keyframes girar { 
+      from { transform: rotate(0deg); } 
+      to { transform: rotate(360deg); } 
+    }
+    .splash p { 
+      color: #FFD700; 
+      margin-top: 20px; 
+      font-size: 1.2em;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    .barra-progresso {
+      width: 200px;
+      height: 3px;
+      background: rgba(255,215,0,0.2);
+      border-radius: 2px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .barra-progresso div {
+      height: 100%;
+      background: var(--dourado);
+      border-radius: 2px;
+      animation: carregar 2.5s ease-in-out forwards;
+    }
+    @keyframes carregar {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
     .branding {
       position: fixed;
       bottom: 20px;
@@ -21,21 +66,40 @@
       color: #ccc;
       font-size: 0.85em;
     }
-    .branding .verified { color: #4caf50; margin-right: 5px; }
+    .branding .verified { 
+      color: #4caf50; 
+      margin-right: 5px; 
+      font-weight: 700;
+    }
+    .versao {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      color: rgba(255,215,0,0.6);
+      font-size: 0.7em;
+      font-family: 'Inter', sans-serif;
+    }
   </style>
 </head>
 <body>
   <div class="splash">
-    <img src="assets/imagens/logo.png" alt="NG Logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <img src="assets/imagens/logo.png" alt="NG Logo" 
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
     <div style="display:none; color:#FFD700; font-size:2em;">⚜️</div>
     <p>A carregar...</p>
+    <div class="barra-progresso">
+      <div></div>
+    </div>
   </div>
+
+  <div class="versao">v2.0</div>
 
   <div class="branding">
     <span class="verified">✔️ Verificado</span>
     © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
   </div>
 
+  <script src="js/utils.js"></script>
   <script>
     document.getElementById('ano').textContent = new Date().getFullYear();
 
@@ -44,8 +108,15 @@
     }, 2500);
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+      navigator.serviceWorker.register('sw.js').then(() => {
+        console.log('✅ Service Worker registado');
+      }).catch(err => {
+        console.log('⚠️ Service Worker:', err);
+      });
     }
+
+    inicializarTema();
+    criarToggleTema();
   </script>
 </body>
 </html>
