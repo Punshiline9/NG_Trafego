@@ -11,26 +11,77 @@
       max-width: 800px;
       margin: 40px auto;
       padding: 20px;
+      animation: fadeIn 0.5s ease;
     }
     .pagina-dinamica h1 {
       color: var(--dourado);
       margin-bottom: 20px;
+      font-size: 1.8em;
+      text-shadow: 0 0 15px rgba(255,215,0,0.3);
     }
     .pagina-dinamica .conteudo {
-      color: #ccc;
-      line-height: 1.6;
+      color: var(--texto-secundario);
+      line-height: 1.8;
+      font-size: 1em;
+    }
+    .pagina-dinamica .conteudo h2 {
+      color: var(--dourado);
+      margin: 20px 0 10px;
+    }
+    .pagina-dinamica .conteudo h3 {
+      color: var(--dourado);
+      margin: 15px 0 8px;
+    }
+    .pagina-dinamica .conteudo ul, 
+    .pagina-dinamica .conteudo ol {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+    .pagina-dinamica .conteudo li {
+      margin-bottom: 6px;
+    }
+    .pagina-dinamica .conteudo a {
+      color: var(--dourado);
+      text-decoration: underline;
+    }
+    .pagina-dinamica .conteudo p {
+      margin-bottom: 12px;
     }
     .lista-paginas-publica {
       max-width: 800px;
       margin: 40px auto;
       padding: 20px;
+      animation: fadeIn 0.5s ease;
+    }
+    .lista-paginas-publica h2 {
+      color: var(--dourado);
+      margin-bottom: 20px;
     }
     .lista-paginas-publica a {
       color: var(--dourado);
       text-decoration: none;
       display: block;
-      padding: 10px;
-      border-bottom: 1px solid rgba(255,215,0,0.2);
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--borda-vidro);
+      transition: all 0.3s;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    .lista-paginas-publica a:hover {
+      background: rgba(255,215,0,0.08);
+      padding-left: 20px;
+      text-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    .btn-voltar {
+      display: inline-block;
+      margin-top: 20px;
+      color: var(--dourado);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-voltar:hover {
+      text-shadow: 0 0 10px rgba(255,215,0,0.5);
     }
   </style>
 </head>
@@ -59,33 +110,35 @@
       if (id) {
         const res = await api.listarPaginas();
         if (res.erro) {
-          container.innerHTML = `<p class="erro">${res.erro}</p>`;
+          container.innerHTML = `<p class="erro" style="text-align:center;padding:20px;">${res.erro}</p>`;
           return;
         }
         const pagina = res.paginas.find(p => p.id == id);
         if (!pagina) {
-          container.innerHTML = '<p>Página não encontrada.</p>';
+          container.innerHTML = '<p style="text-align:center;padding:20px;color:var(--texto-terciario);">Página não encontrada.</p>';
           return;
         }
         container.innerHTML = `
           <div class="pagina-dinamica">
             <h1>${escapeHTML(pagina.titulo)}</h1>
-            <div class="conteudo">${pagina.conteudo}</div>
+            <div class="conteudo">${pagina.conteudo || '<p>Sem conteúdo.</p>'}</div>
+            <a href="custom.html" class="btn-voltar">← Voltar para páginas</a>
           </div>
         `;
+        document.title = escapeHTML(pagina.titulo) + ' - NG';
       } else {
         const res = await api.listarPaginas();
         if (res.erro) {
-          container.innerHTML = `<p class="erro">${res.erro}</p>`;
+          container.innerHTML = `<p class="erro" style="text-align:center;padding:20px;">${res.erro}</p>`;
           return;
         }
-        if (!res.paginas.length) {
-          container.innerHTML = '<p>Nenhuma página disponível.</p>';
+        if (!res.paginas || !res.paginas.length) {
+          container.innerHTML = '<p style="text-align:center;padding:20px;color:var(--texto-terciario);">📭 Nenhuma página disponível.</p>';
           return;
         }
-        let html = '<div class="lista-paginas-publica"><h2 style="color:var(--dourado); margin-bottom:20px;">📄 Páginas</h2>';
+        let html = '<div class="lista-paginas-publica"><h2>📄 Páginas</h2>';
         res.paginas.forEach(p => {
-          html += `<a href="custom.html?id=${p.id}">${escapeHTML(p.titulo)}</a>`;
+          html += `<a href="custom.html?id=${p.id}">📄 ${escapeHTML(p.titulo)}</a>`;
         });
         html += '</div>';
         container.innerHTML = html;

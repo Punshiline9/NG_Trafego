@@ -6,15 +6,44 @@
   <title>Recuperar Senha - NG</title>
   <link rel="stylesheet" href="../css/comum.css">
   <link rel="manifest" href="../manifest.json">
+  <style>
+    .recuperar-container {
+      max-width: 450px;
+      margin: 80px auto;
+      text-align: center;
+    }
+    .recuperar-container h2 {
+      color: var(--dourado);
+      margin-bottom: 10px;
+    }
+    .recuperar-container p {
+      color: var(--texto-secundario);
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+    .recuperar-container .btn {
+      width: 100%;
+    }
+    .link-voltar {
+      display: block;
+      margin-top: 15px;
+      color: var(--dourado);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .link-voltar:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <div class="login-container glass">
-    <h2>Recuperar senha</h2>
-    <p style="margin-bottom:15px;">Insira o seu email para receber um código de recuperação.</p>
+  <div class="recuperar-container glass">
+    <h2>🔑 Recuperar senha</h2>
+    <p>Insira o seu email para receber um código de recuperação.</p>
     <input type="email" id="emailRec" placeholder="Seu email">
     <button class="btn" id="btnRecuperar">Enviar código</button>
     <p id="msg" style="margin-top:15px;"></p>
-    <a href="login.html" class="link-recuperar">← Voltar ao login</a>
+    <a href="login.html" class="link-voltar">← Voltar ao login</a>
   </div>
 
   <div class="creditos">
@@ -34,17 +63,33 @@
     document.getElementById('btnRecuperar').addEventListener('click', async () => {
       const email = document.getElementById('emailRec').value.trim();
       const msg = document.getElementById('msg');
+      
       if (!email) {
-        msg.textContent = 'Insira um email válido.';
+        msg.textContent = '⚠️ Insira um email válido.';
         msg.className = 'erro';
         return;
       }
+
+      if (!validarEmail(email)) {
+        msg.textContent = '⚠️ Formato de email inválido.';
+        msg.className = 'erro';
+        return;
+      }
+
+      const btn = document.getElementById('btnRecuperar');
+      btn.disabled = true;
+      btn.textContent = '⏳ Enviando...';
+
       const res = await api.recuperarSenha(email);
+      
+      btn.disabled = false;
+      btn.textContent = 'Enviar código';
+
       if (res.erro) {
         msg.textContent = res.erro;
         msg.className = 'erro';
       } else {
-        msg.textContent = 'Código enviado! Verifique o seu email/WhatsApp.';
+        msg.textContent = '✅ Código enviado! Verifique o seu email/WhatsApp.';
         msg.className = 'sucesso';
       }
     });

@@ -1,30 +1,54 @@
-// URL do Google Apps Script (substituída pela tua)
-const API_URL = 'https://script.google.com/macros/s/AKfycbx7bH0gglI6FJeL9Vt6ZlpPfoW9nVaFHzCsdtpqwLReibaGv4LM_2ED9zCpl8OxR6siSg/exec';
+// =============================================
+// 🌐 NG TRAFEGO - API (GOOGLE APPS SCRIPT)
+// =============================================
 
-/**
- * Envia uma ação e dados para o backend
- * @param {string} acao - nome da ação (ex: 'login')
- * @param {Object} dados - pares chave/valor
- * @returns {Promise<Object>} resposta do servidor (json)
- */
-async function chamarAPI(acao, dados = {}) {
+const API_URL = 'https://script.google.com/macros/s/AKfycbwnD78AgCIP-fyrzyOTI9gxcTw0cpCouABuA57ffW5-z8ag7zf8n09rnSQ-mp2avVHwow/exec';
+const API_TIMEOUT = 15000;
+
+async function chamarAPI(acao, dados = {}, tentarNovamente = true) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), API_TIMEOUT);
+  
   try {
     const formData = new FormData();
     formData.append('acao', acao);
     for (let chave in dados) {
-      formData.append(chave, dados[chave]);
+      if (dados[chave] !== undefined && dados[chave] !== null) {
+        formData.append(chave, dados[chave]);
+      }
     }
 
     const resposta = await fetch(API_URL, {
       method: 'POST',
-      body: formData
+      body: formData,
+      signal: controller.signal
     });
 
-    if (!resposta.ok) throw new Error('Erro HTTP: ' + resposta.status);
-    return await resposta.json();
+    clearTimeout(timeout);
+
+    if (!resposta.ok) {
+      throw new Error(`Erro HTTP: ${resposta.status}`);
+    }
+
+    const json = await resposta.json();
+    
+    if (json === null || json === undefined) {
+      throw new Error('Resposta vazia do servidor');
+    }
+    
+    return json;
+    
   } catch (e) {
-    console.error('Erro na API:', e);
-    return { erro: 'Falha na conexão com o servidor.' };
+    clearTimeout(timeout);
+    console.error(`❌ API [${acao}]:`, e.message);
+    
+    if (tentarNovamente && (e.name === 'AbortError' || e.message.includes('HTTP'))) {
+      console.warn(`🔄 Retentando [${acao}]...`);
+      await new Promise(r => setTimeout(r, 1000));
+      return chamarAPI(acao, dados, false);
+    }
+    
+    return { erro: 'Falha na conexão. Verifique sua internet.' };
   }
 }
 
@@ -48,9 +72,14 @@ const api = {
   criarTarefa: (dados) => chamarAPI('criarTarefa', dados),
   editarTarefa: (dados) => chamarAPI('editarTarefa', dados),
   listarUtilizadores: () => chamarAPI('listarUtilizadores'),
-  redefinirSenha: (userId, novaSenha) => chamarAPI('redefinirSenha', { userId, novaSenha }),
+  redefinirSenha: (userId, novaSenha, acao) => chamarAPI('redefinirSenha', { userId, nova: novaSenha, acao }),
   configSistema: (dados) => chamarAPI('configSistema', dados),
+  
+  // --- Bots ---
   gerarBots: () => chamarAPI('gerarBots'),
+  gerarBotsPersonalizados: (config) => chamarAPI('gerarBotsPersonalizados', config),
+  
+  // --- Pódio ---
   gerarPodio: () => chamarAPI('gerarPodio'),
 
   // --- Saques (gestor) ---

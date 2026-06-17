@@ -70,6 +70,11 @@
     </div>
   </div>
 
+  <div class="creditos">
+    <span class="selo-verificado">✔️ Verificado</span>
+    © <span id="ano2"></span> Pacheco Gonçalves — Todos os direitos reservados.
+  </div>
+
   <!-- Scripts -->
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
@@ -77,11 +82,12 @@
   <script src="../js/participante.js"></script>
   <script>
     document.getElementById('ano').textContent = new Date().getFullYear();
+    document.getElementById('ano2').textContent = new Date().getFullYear();
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('../sw.js');
     }
 
-    // Preencher select de tarefas quando a página carrega
     (async () => {
       const usuario = obterSessao();
       if (!usuario) return;

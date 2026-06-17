@@ -23,6 +23,7 @@
   <script src="../js/podio.js"></script>
   <script>
     document.getElementById('ano').textContent = new Date().getFullYear();
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('../sw.js');
     }
