@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pódio Final - NG</title>
+  <link rel="stylesheet" href="../css/comum.css">
+  <link rel="stylesheet" href="../css/podio.css">
+  <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+  <div class="podio-container glass">
+    <h1>🏆 Pódio Final</h1>
+    <div id="podio" class="podio"></div>
+  </div>
+
+  <div class="creditos">
+    <span class="selo-verificado">✔️ Verificado</span>
+    © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+  </div>
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/podio.js"></script>
+  <script>
+    document.getElementById('ano').textContent = new Date().getFullYear();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js');
+    }
+  </script>
+</body>
+</html>

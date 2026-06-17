@@ -1,0 +1,82 @@
+/* ====== CONTAINER DO PÓDIO ====== */
+.podio-container {
+  text-align: center;
+  padding: 40px 20px;
+  max-width: 700px;
+  margin: 60px auto;
+}
+
+.podio-container h1 {
+  color: var(--dourado);
+  font-size: 2em;
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+
+/* ====== ESTRUTURA DO PÓDIO ====== */
+.podio {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+/* ====== CADA POSIÇÃO ====== */
+.posicao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--borda-vidro);
+  border-radius: 20px;
+  padding: 20px 15px;
+  min-width: 140px;
+  transition: transform 0.3s;
+}
+
+.posicao:hover {
+  transform: translateY(-5px);
+}
+
+/* Troféus/emojis */
+.posicao .trofeu {
+  font-size: 4em;
+  margin-bottom: 10px;
+}
+
+/* Cores das medalhas */
+.posicao.ouro .trofeu { color: #FFD700; }
+.posicao.prata .trofeu { color: #C0C0C0; }
+.posicao.bronze .trofeu { color: #cd7f32; }
+
+.posicao h2 {
+  color: var(--dourado);
+  margin: 8px 0 4px;
+  font-size: 1.2em;
+}
+
+.posicao p {
+  color: #ccc;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+/* ====== MENSAGEM QUANDO VAZIO ====== */
+.podio-vazio {
+  color: #aaa;
+  font-size: 1.2em;
+  margin-top: 40px;
+}
+
+/* ====== RESPONSIVIDADE ====== */
+@media (max-width: 600px) {
+  .podio {
+    flex-direction: column;
+    align-items: center;
+  }
+  .posicao {
+    width: 80%;
+  }
+}

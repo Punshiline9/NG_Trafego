@@ -1,0 +1,17 @@
+RewriteEngine On
+
+# Forçar HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# Definir index.html como página inicial
+DirectoryIndex index.html
+
+# Remover barra final (exceto diretórios reais)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+# Bloquear acesso directo a ficheiros de configuração
+<FilesMatch "\.(json|md|htaccess)$">
+  Require all denied
+</FilesMatch>

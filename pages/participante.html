@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Participante - NG</title>
+  <link rel="stylesheet" href="../css/comum.css">
+  <link rel="stylesheet" href="../css/participante.css">
+  <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+  <div class="painel glass">
+    <h2>👤 Bem-vindo(a), <span id="nomeUser"></span></h2>
+
+    <!-- Abas de navegação -->
+    <div class="abas">
+      <button class="ativo" data-aba="tarefas">📋 Tarefas</button>
+      <button data-aba="enviar">📤 Enviar</button>
+      <button data-aba="equipa">👥 Equipa</button>
+      <button data-aba="resgate">💰 Resgate</button>
+      <button data-aba="info">ℹ️ Info</button>
+      <button onclick="logout()" style="margin-left:auto;">🚪 Sair</button>
+    </div>
+
+    <!-- Painel Tarefas -->
+    <div id="tarefas" class="aba-painel">
+      <div class="busca-container">
+        <input type="text" id="buscaTarefas" placeholder="🔍 Buscar tarefas (título ou descrição)...">
+      </div>
+      <div id="listaTarefas"></div>
+    </div>
+
+    <!-- Painel Enviar -->
+    <div id="enviar" class="aba-painel oculto">
+      <div class="form-envio">
+        <form id="formEnvio">
+          <label for="tarefaSelect">Selecionar Tarefa</label>
+          <select id="tarefaSelect" required>
+            <option value="">-- Escolha a tarefa --</option>
+          </select>
+          <label for="linkComprovativo">Link do Comprovativo</label>
+          <input type="url" id="linkComprovativo" placeholder="https://..." required>
+          <label for="obsEnvio">Observação (opcional)</label>
+          <textarea id="obsEnvio" rows="2"></textarea>
+          <button type="submit" class="btn">📨 Submeter</button>
+        </form>
+        <div id="statusEnvio"></div>
+      </div>
+    </div>
+
+    <!-- Painel Equipa -->
+    <div id="equipa" class="aba-painel oculto">
+      <div id="equipaPainel"></div>
+    </div>
+
+    <!-- Painel Resgate -->
+    <div id="resgate" class="aba-painel oculto">
+      <div id="resgatePainel"></div>
+    </div>
+
+    <!-- Painel Info -->
+    <div id="info" class="aba-painel oculto">
+      <div id="infoPainel"></div>
+    </div>
+
+    <!-- Rodapé interno do painel -->
+    <div class="painel-rodape">
+      <span class="selo-verificado">✔️ Verificado</span>
+      © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/participante.js"></script>
+  <script>
+    document.getElementById('ano').textContent = new Date().getFullYear();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js');
+    }
+
+    // Preencher select de tarefas quando a página carrega
+    (async () => {
+      const usuario = obterSessao();
+      if (!usuario) return;
+      const res = await api.listarTarefas(usuario.id);
+      if (!res.erro && res.tarefas) {
+        const select = document.getElementById('tarefaSelect');
+        res.tarefas.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t.id;
+          opt.textContent = t.titulo + ' - ' + formatarMoeda(t.valor);
+          select.appendChild(opt);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

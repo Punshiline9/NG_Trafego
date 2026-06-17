@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NG - Sistema de Tarefas</title>
+  <link rel="stylesheet" href="css/comum.css">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #000; flex-direction: column; }
+    .splash { text-align: center; }
+    .splash img { width: 120px; animation: girar 2s linear infinite; }
+    @keyframes girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .splash p { color: #FFD700; margin-top: 20px; font-size: 1.2em; }
+    .branding {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #ccc;
+      font-size: 0.85em;
+    }
+    .branding .verified { color: #4caf50; margin-right: 5px; }
+  </style>
+</head>
+<body>
+  <div class="splash">
+    <img src="assets/imagens/logo.png" alt="NG Logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <div style="display:none; color:#FFD700; font-size:2em;">⚜️</div>
+    <p>A carregar...</p>
+  </div>
+
+  <div class="branding">
+    <span class="verified">✔️ Verificado</span>
+    © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+  </div>
+
+  <script>
+    document.getElementById('ano').textContent = new Date().getFullYear();
+
+    setTimeout(() => {
+      window.location.href = 'pages/login.html';
+    }, 2500);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>

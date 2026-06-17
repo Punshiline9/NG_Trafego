@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Gestor - NG</title>
+  <link rel="stylesheet" href="../css/comum.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+  <div class="admin-painel glass" id="admin-painel-container">
+    <h2>🛡️ Painel do Gestor — <span id="nomeGestor"></span></h2>
+
+    <!-- Abas de navegação -->
+    <div class="abas">
+      <button class="ativo" data-aba="aprovacoes">✅ Aprovações</button>
+      <button data-aba="saques">💸 Saques</button>
+      <button data-aba="tarefasAdmin">📝 Tarefas</button>
+      <button data-aba="utilizadores">👥 Utilizadores</button>
+      <button data-aba="niveis">📊 Níveis</button>
+      <button data-aba="config">⚙️ Config</button>
+      <button data-aba="paginas">📄 Páginas</button>
+      <button data-aba="mensagens">✉️ Mensagens</button>
+      <button data-aba="gestores">🛡️ Gestores</button>
+      <button data-aba="bots">🤖 Bots</button>
+      <button data-aba="podio">🏆 Pódio</button>
+      <button onclick="logout()" style="margin-left:auto;">🚪 Sair</button>
+    </div>
+
+    <!-- Painéis de cada aba -->
+    <div id="aprovacoes" class="aba-painel"></div>
+    <div id="saques" class="aba-painel oculto"></div>
+    <div id="tarefasAdmin" class="aba-painel oculto"></div>
+    <div id="utilizadores" class="aba-painel oculto"></div>
+    <div id="niveis" class="aba-painel oculto"></div>
+    <div id="config" class="aba-painel oculto"></div>
+    <div id="paginas" class="aba-painel oculto"></div>
+    <div id="mensagens" class="aba-painel oculto"></div>
+    <div id="gestores" class="aba-painel oculto"></div>
+    <div id="bots" class="aba-painel oculto">
+      <button class="btn" id="btnGerarBots">🤖 Gerar 50 Bots</button>
+      <p id="statusBots" style="margin-top:10px;"></p>
+    </div>
+    <div id="podio" class="aba-painel oculto">
+      <button class="btn" id="btnGerarPodio">🏆 Gerar Pódio</button>
+    </div>
+
+    <!-- Rodapé interno -->
+    <div class="painel-rodape" style="margin-top:30px; text-align:center; color:#aaa; font-size:0.8em;">
+      <span class="selo-verificado">✔️ Verificado</span>
+      © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    document.getElementById('ano').textContent = new Date().getFullYear();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+/* ====== CONTAINER DO PAINEL ADMIN ====== */
+.admin-painel {
+  max-width: 1100px;
+  margin: 20px auto;
+}
+
+.admin-painel h2 {
+  color: var(--dourado);
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+/* ====== ABAS DO ADMIN ====== */
+.admin-painel .abas {
+  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+}
+
+/* ====== TABELAS ====== */
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.9em;
+}
+
+.tabela th,
+.tabela td {
+  border: 1px solid #444;
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabela th {
+  background: rgba(255, 215, 0, 0.2);
+  color: var(--dourado);
+  font-weight: bold;
+}
+
+.tabela tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tabela tr:hover {
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.tabela .acoes {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.tabela .btn {
+  padding: 5px 10px;
+  font-size: 0.8em;
+  border-radius: 15px;
+}
+
+/* ====== CARDS DE FORMULÁRIOS (criação/edição) ====== */
+.card-form {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--borda-vidro);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card-form h3 {
+  color: var(--dourado);
+  margin-bottom: 15px;
+}
+
+.card-form label {
+  display: block;
+  color: var(--dourado);
+  margin-bottom: 5px;
+  font-size: 0.9em;
+}
+
+.card-form input,
+.card-form textarea,
+.card-form select {
+  margin-bottom: 12px;
+}
+
+.card-form .btn {
+  margin-top: 5px;
+}
+
+/* ====== CONFIGURAÇÕES (inputs lado a lado) ====== */
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.config-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.config-item label {
+  color: var(--dourado);
+  margin-bottom: 5px;
+  font-size: 0.9em;
+}
+
+/* ====== PÁGINAS DINÂMICAS ====== */
+.lista-paginas {
+  margin-top: 15px;
+}
+
+.pagina-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagina-item:hover {
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.pagina-item .titulo {
+  color: var(--dourado);
+  font-weight: bold;
+}
+
+.pagina-item .acoes {
+  display: flex;
+  gap: 8px;
+}
+
+/* ====== BARRA DE STATUS / MENSAGENS ====== */
+.status-bar {
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.status-bar.sucesso {
+  background: rgba(76, 175, 80, 0.2);
+  color: var(--sucesso);
+  border: 1px solid var(--sucesso);
+}
+
+.status-bar.erro {
+  background: rgba(255, 77, 77, 0.2);
+  color: var(--erro);
+  border: 1px solid var(--erro);
+}
+
+/* ====== MODAL SIMPLES (confirmações) ====== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: var(--vidro);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--dourado);
+  border-radius: 16px;
+  padding: 25px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-box h3 {
+  color: var(--dourado);
+  margin-bottom: 15px;
+}
+
+.modal-box .btn {
+  margin: 5px;
+}
+
+/* ====== RESPONSIVIDADE ====== */
+@media (max-width: 768px) {
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabela {
+    font-size: 0.8em;
+  }
+
+  .tabela th,
+  .tabela td {
+    padding: 6px 4px;
+  }
+
+  .admin-painel .abas {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .admin-painel .abas button {
+    white-space: nowrap;
+    font-size: 0.75em;
+    padding: 6px 10px;
+  }
+}

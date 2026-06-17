@@ -1,0 +1,149 @@
+/* ====== VARIÁVEIS ====== */
+:root {
+  --dourado: #FFD700;
+  --dourado-escuro: #b8860b;
+  --preto: #000;
+  --cinza-escuro: #1a1a1a;
+  --vidro: rgba(0,0,0,0.65);
+  --borda-vidro: rgba(255,215,0,0.35);
+  --sombra: 0 4px 20px rgba(0,0,0,0.5);
+  --erro: #ff4d4d;
+  --sucesso: #4caf50;
+}
+
+/* ====== RESET ====== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--preto) url('../assets/imagens/fundo.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* ====== GLASSMORPHISM ====== */
+.glass {
+  background: var(--vidro);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid var(--borda-vidro);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--sombra);
+}
+
+/* ====== BOTÕES ====== */
+.btn {
+  background: linear-gradient(135deg, var(--dourado), var(--dourado-escuro));
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn:hover { opacity: 0.85; transform: scale(1.02); }
+.btn.negro {
+  background: #222;
+  color: var(--dourado);
+  border: 1px solid var(--dourado);
+}
+
+/* ====== INPUTS / TEXTAREAS / SELECTS ====== */
+input, textarea, select {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--borda-vidro);
+  border-radius: 8px;
+  padding: 10px;
+  color: #fff;
+  width: 100%;
+  margin-bottom: 10px;
+}
+input::placeholder, textarea::placeholder { color: #ccc; }
+
+/* ====== ABAS (botões de navegação) ====== */
+.abas {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.abas button {
+  background: transparent;
+  border: 1px solid var(--dourado);
+  color: var(--dourado);
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.abas button.ativo,
+.abas button:hover {
+  background: var(--dourado);
+  color: #000;
+}
+
+/* ====== BARRA DE BUSCA INTELIGENTE ====== */
+.busca-container {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+.busca-container input {
+  flex: 1;
+  margin-bottom: 0;
+}
+.resultados-busca {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+.resultado-item {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.resultado-item:hover {
+  background: rgba(255,215,0,0.15);
+}
+.resultado-item h3 {
+  color: var(--dourado);
+  margin-bottom: 5px;
+}
+.resultado-item p {
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+/* ====== UTILITÁRIOS ====== */
+.oculto { display: none !important; }
+.erro { color: var(--erro); font-size: 0.9em; margin-bottom: 10px; }
+.sucesso { color: var(--sucesso); }
+.texto-dourado { color: var(--dourado); }
+.centro { text-align: center; }
+
+/* ====== MARCA D'ÁGUA / SELOS ====== */
+.selo-verificado {
+  color: var(--sucesso);
+  font-size: 0.9em;
+}
+.creditos {
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #aaa;
+  font-size: 0.8em;
+  z-index: 999;
+}
+
+/* ====== RESPONSIVIDADE ====== */
+@media (max-width: 600px) {
+  .glass { padding: 15px; margin: 10px; }
+  .abas button { padding: 6px 12px; font-size: 0.8em; }
+  .busca-container { flex-direction: column; }
+}

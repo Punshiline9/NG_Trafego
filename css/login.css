@@ -1,0 +1,93 @@
+/* ====== CONTAINER PRINCIPAL ====== */
+.login-container {
+  max-width: 420px;
+  margin: 80px auto;
+  text-align: center;
+}
+
+.login-container img {
+  width: 80px;
+  margin-bottom: 20px;
+}
+
+.login-container h2 {
+  color: var(--dourado);
+  margin-bottom: 20px;
+  font-size: 1.6em;
+}
+
+/* ====== TOGGLE LOGIN / CADASTRO ====== */
+.form-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0 25px;
+}
+
+.form-toggle span {
+  cursor: pointer;
+  padding: 8px 20px;
+  border-bottom: 2px solid transparent;
+  color: #ccc;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.form-toggle span.ativo {
+  border-bottom-color: var(--dourado);
+  color: var(--dourado);
+  font-weight: bold;
+}
+
+.form-toggle span:hover {
+  color: var(--dourado);
+}
+
+/* ====== FORMULÁRIOS ====== */
+.form-box {
+  transition: opacity 0.3s;
+}
+
+.form-box input {
+  margin-bottom: 12px;
+}
+
+.form-box .btn {
+  width: 100%;
+  margin-top: 5px;
+}
+
+/* ====== LINK ESQUECI SENHA ====== */
+.link-recuperar {
+  display: block;
+  margin-top: 12px;
+  color: var(--dourado);
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+.link-recuperar:hover {
+  text-decoration: underline;
+}
+
+/* ====== MENSAGENS ====== */
+#msgErro {
+  margin-top: 15px;
+}
+
+/* ====== RESPONSIVIDADE ====== */
+@media (max-width: 600px) {
+  .login-container {
+    margin: 40px 15px;
+    padding: 20px 15px;
+  }
+
+  .login-container img {
+    width: 60px;
+  }
+
+  .form-toggle span {
+    padding: 6px 12px;
+    font-size: 0.9em;
+  }
+}

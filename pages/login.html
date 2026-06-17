@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - NG</title>
+  <link rel="stylesheet" href="../css/comum.css">
+  <link rel="stylesheet" href="../css/login.css">
+  <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+  <div class="login-container glass">
+    <img src="../assets/imagens/logo.png" alt="NG Logo"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <div style="display:none; color:#FFD700; font-size:2em;">⚜️</div>
+
+    <div class="form-toggle">
+      <span class="ativo" data-form="login">Login</span>
+      <span data-form="cadastro">Cadastro</span>
+    </div>
+
+    <div id="formLogin" class="form-box">
+      <input type="text" id="userLogin" placeholder="Usuário ou email" autocomplete="username">
+      <input type="password" id="senhaLogin" placeholder="Senha" autocomplete="current-password">
+      <button class="btn" id="btnLogin">Entrar</button>
+      <a href="recuperacao.html" class="link-recuperar">Esqueci a senha</a>
+    </div>
+
+    <div id="formCadastro" class="form-box oculto">
+      <input type="text" id="nomeCad" placeholder="Nome completo">
+      <input type="email" id="emailCad" placeholder="Email">
+      <input type="text" id="userCad" placeholder="Usuário" autocomplete="off">
+      <input type="password" id="senhaCad" placeholder="Senha" autocomplete="new-password">
+      <button class="btn" id="btnCadastrar">Criar conta</button>
+    </div>
+
+    <div id="msgErro" class="erro"></div>
+  </div>
+
+  <div class="creditos">
+    <span class="selo-verificado">✔️ Verificado</span>
+    © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    document.getElementById('ano').textContent = new Date().getFullYear();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js');
+    }
+
+    const spans = document.querySelectorAll('.form-toggle span');
+    const formLogin = document.getElementById('formLogin');
+    const formCadastro = document.getElementById('formCadastro');
+    const msgErro = document.getElementById('msgErro');
+
+    spans.forEach(span => {
+      span.addEventListener('click', () => {
+        spans.forEach(s => s.classList.remove('ativo'));
+        span.classList.add('ativo');
+        const mostrarLogin = span.dataset.form === 'login';
+        formLogin.classList.toggle('oculto', !mostrarLogin);
+        formCadastro.classList.toggle('oculto', mostrarLogin);
+        msgErro.textContent = '';
+      });
+    });
+
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const user = document.getElementById('userLogin').value.trim();
+      const senha = document.getElementById('senhaLogin').value;
+      msgErro.textContent = '';
+      try {
+        await login(user, senha);
+      } catch (e) {
+        msgErro.textContent = e.message;
+      }
+    });
+
+    document.getElementById('btnCadastrar').addEventListener('click', async () => {
+      const dados = {
+        nome: document.getElementById('nomeCad').value.trim(),
+        email: document.getElementById('emailCad').value.trim(),
+        user: document.getElementById('userCad').value.trim(),
+        senha: document.getElementById('senhaCad').value
+      };
+
+      if (!dados.nome || !dados.email || !dados.user || !dados.senha) {
+        msgErro.textContent = 'Preencha todos os campos.';
+        return;
+      }
+
+      const res = await api.cadastrar(dados);
+      if (res.erro) {
+        msgErro.textContent = res.erro;
+      } else {
+        alert('Conta criada com sucesso! Faça login.');
+        document.querySelector('.form-toggle span[data-form="login"]').click();
+        document.getElementById('userLogin').value = dados.user;
+      }
+    });
+
+    document.getElementById('senhaLogin').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btnLogin').click();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página - NG</title>
+  <link rel="stylesheet" href="../css/comum.css">
+  <link rel="manifest" href="../manifest.json">
+  <style>
+    .pagina-dinamica {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .pagina-dinamica h1 {
+      color: var(--dourado);
+      margin-bottom: 20px;
+    }
+    .pagina-dinamica .conteudo {
+      color: #ccc;
+      line-height: 1.6;
+    }
+    .lista-paginas-publica {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .lista-paginas-publica a {
+      color: var(--dourado);
+      text-decoration: none;
+      display: block;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,215,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="conteiner" class="glass" style="max-width: 800px; margin: 40px auto;"></div>
+
+  <div class="creditos">
+    <span class="selo-verificado">✔️ Verificado</span>
+    © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    document.getElementById('ano').textContent = new Date().getFullYear();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js');
+    }
+
+    async function carregar() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const container = document.getElementById('conteiner');
+
+      if (id) {
+        const res = await api.listarPaginas();
+        if (res.erro) {
+          container.innerHTML = `<p class="erro">${res.erro}</p>`;
+          return;
+        }
+        const pagina = res.paginas.find(p => p.id == id);
+        if (!pagina) {
+          container.innerHTML = '<p>Página não encontrada.</p>';
+          return;
+        }
+        container.innerHTML = `
+          <div class="pagina-dinamica">
+            <h1>${escapeHTML(pagina.titulo)}</h1>
+            <div class="conteudo">${pagina.conteudo}</div>
+          </div>
+        `;
+      } else {
+        const res = await api.listarPaginas();
+        if (res.erro) {
+          container.innerHTML = `<p class="erro">${res.erro}</p>`;
+          return;
+        }
+        if (!res.paginas.length) {
+          container.innerHTML = '<p>Nenhuma página disponível.</p>';
+          return;
+        }
+        let html = '<div class="lista-paginas-publica"><h2 style="color:var(--dourado); margin-bottom:20px;">📄 Páginas</h2>';
+        res.paginas.forEach(p => {
+          html += `<a href="custom.html?id=${p.id}">${escapeHTML(p.titulo)}</a>`;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      }
+    }
+
+    carregar();
+  </script>
+</body>
+</html>

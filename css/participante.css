@@ -1,0 +1,148 @@
+/* ====== CONTAINER DO PAINEL ====== */
+.painel {
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.painel h2 {
+  color: var(--dourado);
+  margin-bottom: 20px;
+  font-size: 1.4em;
+}
+
+/* ====== CARDS DE TAREFAS ====== */
+.card-tarefa {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid var(--dourado);
+  padding: 14px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.card-tarefa:hover {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.card-tarefa strong {
+  color: var(--dourado);
+  font-size: 1.1em;
+}
+
+.card-tarefa p {
+  color: #ccc;
+  margin-top: 6px;
+  font-size: 0.9em;
+}
+
+.card-tarefa .valor {
+  font-weight: bold;
+  color: var(--dourado);
+  margin-top: 8px;
+}
+
+/* ====== BARRA DE PROGRESSO ====== */
+.progresso {
+  background: #333;
+  height: 10px;
+  border-radius: 5px;
+  margin: 8px 0 12px;
+  overflow: hidden;
+}
+
+.progresso div {
+  background: linear-gradient(90deg, var(--dourado), var(--dourado-escuro));
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
+
+/* ====== FORMULÁRIO DE ENVIO ====== */
+.form-envio {
+  margin-top: 20px;
+}
+
+.form-envio label {
+  display: block;
+  color: var(--dourado);
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.form-envio textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* ====== EQUIPA ====== */
+.equipa-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.membro-equipa {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--borda-vidro);
+  border-radius: 10px;
+  padding: 12px;
+  flex: 1 1 180px;
+  text-align: center;
+}
+
+.membro-equipa .bandeira {
+  font-size: 2em;
+}
+
+.membro-equipa .nome {
+  color: var(--dourado);
+  margin-top: 8px;
+}
+
+/* ====== RESGATE ====== */
+.saldo-atual {
+  font-size: 2em;
+  color: var(--dourado);
+  margin: 15px 0;
+}
+
+.resgate-opcoes {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.resgate-opcoes button {
+  flex: 1;
+}
+
+/* ====== INFORMAÇÕES ====== */
+.info-texto {
+  line-height: 1.6;
+  color: #ccc;
+}
+
+.info-texto h3 {
+  color: var(--dourado);
+  margin: 15px 0 8px;
+}
+
+/* ====== RODAPÉ DO PAINEL ====== */
+.painel-rodape {
+  margin-top: 30px;
+  text-align: center;
+  color: #aaa;
+  font-size: 0.8em;
+}
+
+/* ====== RESPONSIVIDADE ====== */
+@media (max-width: 600px) {
+  .equipa-lista {
+    flex-direction: column;
+  }
+  .resgate-opcoes {
+    flex-direction: column;
+  }
+}

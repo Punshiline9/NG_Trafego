@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar Senha - NG</title>
+  <link rel="stylesheet" href="../css/comum.css">
+  <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+  <div class="login-container glass">
+    <h2>Recuperar senha</h2>
+    <p style="margin-bottom:15px;">Insira o seu email para receber um código de recuperação.</p>
+    <input type="email" id="emailRec" placeholder="Seu email">
+    <button class="btn" id="btnRecuperar">Enviar código</button>
+    <p id="msg" style="margin-top:15px;"></p>
+    <a href="login.html" class="link-recuperar">← Voltar ao login</a>
+  </div>
+
+  <div class="creditos">
+    <span class="selo-verificado">✔️ Verificado</span>
+    © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    document.getElementById('ano').textContent = new Date().getFullYear();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('../sw.js');
+    }
+
+    document.getElementById('btnRecuperar').addEventListener('click', async () => {
+      const email = document.getElementById('emailRec').value.trim();
+      const msg = document.getElementById('msg');
+      if (!email) {
+        msg.textContent = 'Insira um email válido.';
+        msg.className = 'erro';
+        return;
+      }
+      const res = await api.recuperarSenha(email);
+      if (res.erro) {
+        msg.textContent = res.erro;
+        msg.className = 'erro';
+      } else {
+        msg.textContent = 'Código enviado! Verifique o seu email/WhatsApp.';
+        msg.className = 'sucesso';
+      }
+    });
+  </script>
+</body>
+</html>

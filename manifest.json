@@ -1,0 +1,16 @@
+{
+  "name": "NG Tarefas",
+  "short_name": "NG",
+  "description": "Sistema de tarefas e recompensas",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FFD700",
+  "icons": [
+    {
+      "src": "assets/imagens/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
