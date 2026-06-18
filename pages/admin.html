@@ -12,7 +12,6 @@
   <div class="admin-painel glass" id="admin-painel-container">
     <h2>🛡️ Painel do Gestor — <span id="nomeGestor"></span></h2>
 
-    <!-- Abas de navegação -->
     <div class="abas">
       <button class="ativo" data-aba="aprovacoes">✅ Aprovações</button>
       <button data-aba="saques">💸 Saques</button>
@@ -28,7 +27,6 @@
       <button onclick="logout()" style="margin-left:auto;">🚪 Sair</button>
     </div>
 
-    <!-- Painéis de cada aba -->
     <div id="aprovacoes" class="aba-painel"></div>
     <div id="saques" class="aba-painel oculto"></div>
     <div id="tarefasAdmin" class="aba-painel oculto"></div>
@@ -38,16 +36,16 @@
     <div id="paginas" class="aba-painel oculto"></div>
     <div id="mensagens" class="aba-painel oculto"></div>
     <div id="gestores" class="aba-painel oculto"></div>
-    <div id="bots" class="aba-painel oculto">
-      <button class="btn" id="btnGerarBots">🤖 Gerar 50 Bots</button>
-      <p id="statusBots" style="margin-top:10px;"></p>
-    </div>
+    <div id="bots" class="aba-painel oculto"></div>
     <div id="podio" class="aba-painel oculto">
-      <button class="btn" id="btnGerarPodio">🏆 Gerar Pódio</button>
+      <div class="card-form" style="text-align:center;">
+        <h3>🏆 Gerar Pódio</h3>
+        <p style="color:var(--texto-secundario);margin-bottom:20px;">Gera o pódio com os 3 melhores participantes e abre numa nova janela.</p>
+        <button class="btn" id="btnGerarPodio" style="font-size:1.1em;padding:14px 30px;">🏆 Gerar Pódio</button>
+      </div>
     </div>
 
-    <!-- Rodapé interno -->
-    <div class="painel-rodape" style="margin-top:30px; text-align:center; color:#aaa; font-size:0.8em;">
+    <div class="painel-rodape">
       <span class="selo-verificado">✔️ Verificado</span>
       © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
     </div>
@@ -58,7 +56,6 @@
     © <span id="ano2"></span> Pacheco Gonçalves — Todos os direitos reservados.
   </div>
 
-  <!-- Scripts -->
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/utils.js"></script>
