@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('admin-painel-container').addEventListener('click', function(e) {
     var target = e.target;
+    
     if (target.classList.contains('btn-aprovar')) {
       modalConfirmar('Aprovar Submissão', 'Confirma a aprovação desta submissão?', function() {
         aprovarSubmissao(target.dataset.id);
@@ -59,12 +60,49 @@ document.addEventListener('DOMContentLoaded', function() {
         eliminarPagina(target.dataset.id);
       });
     }
+    if (target.classList.contains('btn-eliminar-utilizador')) {
+      modalConfirmar('Eliminar Utilizador', 'Tem certeza que deseja eliminar este utilizador permanentemente?', function() {
+        eliminarUtilizador(target.dataset.id);
+      });
+    }
+    if (target.classList.contains('btn-banir-utilizador')) {
+      modalConfirmar('Banir Utilizador', 'O utilizador será banido e não poderá aceder ao sistema. Continuar?', function() {
+        banirUtilizador(target.dataset.id);
+      });
+    }
+    if (target.classList.contains('btn-editar-tarefa')) {
+      editarTarefaPrompt(target.dataset.id);
+    }
+    if (target.classList.contains('btn-eliminar-tarefa')) {
+      modalConfirmar('Eliminar Tarefa', 'Esta tarefa será removida permanentemente. Continuar?', function() {
+        eliminarTarefa(target.dataset.id);
+      });
+    }
+    if (target.classList.contains('btn-eliminar-bot')) {
+      modalConfirmar('Eliminar Bot', 'Este bot será removido permanentemente. Continuar?', function() {
+        eliminarBot(target.dataset.id);
+      });
+    }
+    if (target.classList.contains('btn-limpar-bots')) {
+      modalConfirmar('Eliminar TODOS os Bots', 'Isto vai remover todos os bots do sistema. Esta ação é irreversível!', function() {
+        limparTodosBots();
+      });
+    }
+    if (target.classList.contains('btn-rejeitar-saque')) {
+      var motivoSaque = prompt('Motivo da rejeição do saque:');
+      if (motivoSaque !== null && motivoSaque.trim()) rejeitarSaque(target.dataset.id, motivoSaque.trim());
+    }
     if (target.id === 'btnNovaPagina') criarNovaPagina();
     if (target.id === 'btnGerarBots') gerarBotsConfigurados();
     if (target.id === 'btnGerarPodio') gerarPodio();
     if (target.id === 'btnSalvarConfig') salvarConfig();
     if (target.id === 'btnSalvarNiveis') salvarNiveis();
     if (target.id === 'btnCriarTarefa') criarTarefa();
+    if (target.id === 'btnLimparTodosBots') {
+      modalConfirmar('Eliminar TODOS os Bots', 'Isto vai remover todos os bots do sistema. Esta ação é irreversível!', function() {
+        limparTodosBots();
+      });
+    }
   });
 });
 
@@ -161,14 +199,15 @@ async function carregarAprovacoes() {
     return; 
   }
   
-  var html = '<table class="tabela"><thead><tr><th>ID</th><th>Utilizador</th><th>Tarefa</th><th>Data</th><th>Link</th><th>Ações</th></tr></thead><tbody>';
+  var html = '<table class="tabela"><thead><tr><th>ID</th><th>Utilizador</th><th>Tarefa</th><th>Data</th><th>Link</th><th>Obs</th><th>Ações</th></tr></thead><tbody>';
   res.submissoes.forEach(function(s) {
     html += '<tr>' +
       '<td>#' + s.id + '</td>' +
       '<td>' + escapeHTML(s.nome) + '</td>' +
       '<td>' + escapeHTML(s.tarefa) + '</td>' +
       '<td>' + formatarData(s.data) + '</td>' +
-      '<td><a href="' + escapeHTML(s.link) + '" target="_blank" style="color:var(--dourado);">🔗</a></td>' +
+      '<td><a href="' + escapeHTML(s.link) + '" target="_blank" style="color:var(--dourado);">🔗 Ver</a></td>' +
+      '<td><small>' + escapeHTML(s.observacao || '-') + '</small></td>' +
       '<td class="acoes">' +
       '<button class="btn btn-sm btn-aprovar" data-id="' + s.id + '">✅</button>' +
       '<button class="btn btn-sm negro btn-rejeitar" data-id="' + s.id + '">❌</button>' +
@@ -211,7 +250,10 @@ async function carregarSaques() {
       '<td>' + escapeHTML(s.nome) + '</td>' +
       '<td>' + formatarMoeda(s.valor) + '</td>' +
       '<td>' + formatarData(s.data) + '</td>' +
-      '<td class="acoes"><button class="btn btn-sm btn-confirmar-saque" data-id="' + s.id + '">💸 Pagar</button></td>' +
+      '<td class="acoes">' +
+      '<button class="btn btn-sm btn-confirmar-saque" data-id="' + s.id + '">💸 Pagar</button>' +
+      '<button class="btn btn-sm negro btn-rejeitar-saque" data-id="' + s.id + '">❌ Rejeitar</button>' +
+      '</td>' +
       '</tr>';
   });
   html += '</tbody></table>';
@@ -221,6 +263,12 @@ async function carregarSaques() {
 async function confirmarPagamento(saqueId, comprovativoUrl) {
   var res = await api.confirmarPagamento(saqueId, comprovativoUrl);
   mostrarToast(res.erro || 'Pagamento confirmado!', res.erro ? 'erro' : 'sucesso');
+  carregarSaques();
+}
+
+async function rejeitarSaque(saqueId, motivo) {
+  var res = await api.rejeitarSaque(saqueId, motivo);
+  mostrarToast(res.erro || 'Saque rejeitado!', res.erro ? 'erro' : 'aviso');
   carregarSaques();
 }
 
@@ -265,6 +313,45 @@ async function criarTarefa() {
   if (!res.erro) { carregarTarefasAdmin(); atualizarStats(); }
 }
 
+async function editarTarefaPrompt(id) {
+  var res = await api.listarTarefas(0);
+  var tarefa = null;
+  if (res.tarefas) {
+    for (var i = 0; i < res.tarefas.length; i++) {
+      if (res.tarefas[i].id == id) { tarefa = res.tarefas[i]; break; }
+    }
+  }
+  if (!tarefa) return;
+  
+  var novoTitulo = prompt('Novo título:', tarefa.titulo);
+  if (novoTitulo === null) return;
+  var novaDescricao = prompt('Nova descrição:', tarefa.descricao || '');
+  if (novaDescricao === null) return;
+  var novoValor = prompt('Novo valor (Kz):', tarefa.valor);
+  if (novoValor === null) return;
+  var novoTempo = prompt('Novo tempo estimado:', tarefa.tempoEstimado || '');
+  if (novoTempo === null) return;
+  
+  var dados = {
+    id: id,
+    titulo: novoTitulo.trim(),
+    descricao: novaDescricao.trim(),
+    valor: Number(novoValor),
+    tempoEstimado: novoTempo.trim(),
+    nivel: tarefa.nivel
+  };
+  
+  var resultado = await api.editarTarefa(dados);
+  mostrarToast(resultado.erro || 'Tarefa atualizada!', resultado.erro ? 'erro' : 'sucesso');
+  if (!resultado.erro) carregarTarefasAdmin();
+}
+
+async function eliminarTarefa(id) {
+  var res = await api.editarTarefa({ id: id, acao: 'excluir' });
+  mostrarToast(res.erro || 'Tarefa eliminada!', res.erro ? 'erro' : 'aviso');
+  if (!res.erro) { carregarTarefasAdmin(); atualizarStats(); }
+}
+
 async function listarTarefasAdmin() {
   var container = document.getElementById('listaTarefasAdmin');
   var res = await api.listarTarefas(0);
@@ -273,11 +360,19 @@ async function listarTarefasAdmin() {
   var html = '';
   res.tarefas.forEach(function(t) {
     html += '<div class="card-tarefa">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
       '<strong>' + escapeHTML(t.titulo) + '</strong>' +
       '<span class="badge-status pendente">' + (t.nivel || 'Todos') + '</span>' +
+      '</div>' +
       '<p>' + escapeHTML(t.descricao || '') + '</p>' +
       '<p class="valor">' + formatarMoeda(t.valor) + '</p>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
       '<small>⏱️ ' + (t.tempoEstimado || 'N/D') + ' | ID: #' + t.id + '</small>' +
+      '<span>' +
+      '<button class="btn btn-sm btn-editar-tarefa" data-id="' + t.id + '">✏️</button>' +
+      '<button class="btn btn-sm negro btn-eliminar-tarefa" data-id="' + t.id + '">🗑️</button>' +
+      '</span>' +
+      '</div>' +
       '</div>';
   });
   container.innerHTML = html;
@@ -291,18 +386,21 @@ async function carregarUtilizadores() {
   
   if (res.erro) { painel.innerHTML = '<div class="status-bar erro">' + res.erro + '</div>'; return; }
   
-  var html = '<table class="tabela"><thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Tipo</th><th>Saldo</th><th>Ações</th></tr></thead><tbody>';
+  var html = '<table class="tabela"><thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>User</th><th>Tipo</th><th>Saldo</th><th>Ações</th></tr></thead><tbody>';
   res.utilizadores.forEach(function(u) {
-    var tipoBadge = u.tipo === 'gestor' ? 'pago' : 'pendente';
+    var tipoBadge = u.tipo === 'gestor' ? 'pago' : u.tipo === 'banido' ? 'rejeitada' : 'pendente';
     html += '<tr>' +
       '<td>#' + u.id + '</td>' +
       '<td>' + escapeHTML(u.nome) + '</td>' +
-      '<td>' + escapeHTML(u.email) + '</td>' +
-      '<td><span class="badge-status ' + tipoBadge + '">' + u.tipo + '</span></td>' +
+      '<td>' + escapeHTML(u.email || '-') + '</td>' +
+      '<td>' + escapeHTML(u.user || '-') + '</td>' +
+      '<td><span class="badge-status ' + tipoBadge + '">' + (u.tipo || 'participante') + '</span></td>' +
       '<td>' + formatarMoeda(u.saldo) + '</td>' +
       '<td class="acoes">' +
-      '<button class="btn btn-sm" onclick="promoverUsuario(' + u.id + ')">⭐</button>' +
-      '<button class="btn btn-sm negro" onclick="redefinirSenhaPrompt(' + u.id + ')">🔑</button>' +
+      '<button class="btn btn-sm" onclick="promoverUsuario(' + u.id + ')" title="Promover a Gestor">⭐</button>' +
+      '<button class="btn btn-sm" onclick="redefinirSenhaPrompt(' + u.id + ')" title="Redefinir Senha">🔑</button>' +
+      '<button class="btn btn-sm negro btn-banir-utilizador" data-id="' + u.id + '" title="Banir">🚫</button>' +
+      '<button class="btn btn-sm negro btn-eliminar-utilizador" data-id="' + u.id + '" title="Eliminar">🗑️</button>' +
       '</td>' +
       '</tr>';
   });
@@ -324,6 +422,18 @@ async function redefinirSenhaPrompt(userId) {
   if (nova.length < 4) { mostrarToast('Mínimo 4 caracteres.', 'aviso'); return; }
   var res = await api.redefinirSenha(userId, nova);
   mostrarToast(res.erro || 'Senha redefinida!', res.erro ? 'erro' : 'sucesso');
+}
+
+async function eliminarUtilizador(userId) {
+  var res = await api.eliminarUtilizador(userId);
+  mostrarToast(res.erro || 'Utilizador eliminado!', res.erro ? 'erro' : 'sucesso');
+  if (!res.erro) { carregarUtilizadores(); atualizarStats(); }
+}
+
+async function banirUtilizador(userId) {
+  var res = await api.banirUtilizador(userId);
+  mostrarToast(res.erro || 'Utilizador banido!', res.erro ? 'erro' : 'aviso');
+  if (!res.erro) carregarUtilizadores();
 }
 
 // ========== NÍVEIS ==========
@@ -643,6 +753,7 @@ function carregarBotsPainel() {
     '📊 <b>Intermediários:</b> 20-80% do máximo<br>' +
     '📉 <b>Restantes:</b> 1-40% do máximo</p>' +
     '<button class="btn" id="btnGerarBots" style="width:100%;padding:14px;font-size:1.1em;">🤖 Gerar Bots</button>' +
+    '<button class="btn negro" id="btnLimparTodosBots" style="width:100%;margin-top:8px;">🗑️ Eliminar Todos os Bots</button>' +
     '<p id="statusBots" style="margin-top:12px;text-align:center;"></p>' +
     '</div>' +
     '<div id="listaBotsGerados" style="margin-top:20px;"></div>';
@@ -697,18 +808,23 @@ function exibirBotsGerados(bots) {
   var container = document.getElementById('listaBotsGerados');
   if (!container) return;
   
-  var html = '<h4 style="color:var(--dourado);margin-bottom:12px;">📋 Bots Gerados (' + bots.length + ')</h4>';
+  var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+    '<h4 style="color:var(--dourado);margin:0;">📋 Bots Gerados (' + bots.length + ')</h4>' +
+    '<button class="btn btn-sm negro btn-limpar-bots" style="font-size:0.75em;">🗑️ Limpar Lista</button>' +
+    '</div>';
   html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;max-height:400px;overflow-y:auto;">';
   
   var limite = Math.min(bots.length, 30);
   for (var i = 0; i < limite; i++) {
     var bot = bots[i];
-    html += '<div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(255,255,255,0.03);border-radius:8px;">' +
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(255,255,255,0.03);border-radius:8px;position:relative;">' +
       '<span style="font-size:1.4em;">' + escapeHTML(bot.emoji || '👤') + '</span>' +
-      '<div>' +
+      '<div style="flex:1;">' +
       '<span style="color:var(--dourado);font-size:0.9em;">' + escapeHTML(bot.nome) + '</span>' +
       '<br><small style="color:var(--texto-terciario);">' + formatarMoeda(bot.pontos) + '</small>' +
-      '</div></div>';
+      '</div>' +
+      '<button class="btn btn-sm negro btn-eliminar-bot" data-id="' + bot.id + '" style="font-size:0.7em;padding:3px 6px;" title="Eliminar bot">🗑️</button>' +
+      '</div>';
   }
   
   if (bots.length > 30) {
@@ -717,6 +833,21 @@ function exibirBotsGerados(bots) {
   
   html += '</div>';
   container.innerHTML = html;
+}
+
+async function eliminarBot(userId) {
+  var res = await api.eliminarUtilizador(userId);
+  mostrarToast(res.erro || 'Bot eliminado!', res.erro ? 'erro' : 'sucesso');
+  if (!res.erro) atualizarStats();
+}
+
+async function limparTodosBots() {
+  var res = await api.limparBots();
+  mostrarToast(res.erro || res.mensagem || 'Todos os bots foram eliminados!', res.erro ? 'erro' : 'sucesso');
+  if (!res.erro) {
+    document.getElementById('listaBotsGerados').innerHTML = '';
+    atualizarStats();
+  }
 }
 
 // ========== PÓDIO ==========
@@ -737,3 +868,7 @@ window.gerarBotsConfigurados = gerarBotsConfigurados;
 window.gerarPodio = gerarPodio;
 window.promoverUsuario = promoverUsuario;
 window.redefinirSenhaPrompt = redefinirSenhaPrompt;
+window.eliminarUtilizador = eliminarUtilizador;
+window.banirUtilizador = banirUtilizador;
+window.eliminarBot = eliminarBot;
+window.limparTodosBots = limparTodosBots;
