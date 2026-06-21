@@ -4,13 +4,23 @@
   padding: 40px 20px;
   max-width: 700px;
   margin: 60px auto;
+  position: relative;
+  z-index: 1;
 }
 
 .podio-container h1 {
   color: var(--dourado);
   font-size: 2em;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   text-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+
+.subtitulo {
+  color: var(--dourado);
+  text-align: center;
+  font-size: 1.1em;
+  margin-bottom: 30px;
+  opacity: 0.9;
 }
 
 /* ====== ESTRUTURA DO PÓDIO ====== */
@@ -20,7 +30,7 @@
   align-items: flex-end;
   gap: 20px;
   flex-wrap: wrap;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 /* ====== CADA POSIÇÃO ====== */
@@ -28,46 +38,80 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--vidro-claro);
   border: 1px solid var(--borda-vidro);
   border-radius: 20px;
-  padding: 20px 15px;
+  padding: 24px 20px;
   min-width: 140px;
-  transition: transform 0.3s;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  backdrop-filter: blur(10px);
 }
 
 .posicao:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
+  border-color: var(--dourado);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4), 0 0 20px rgba(255,215,0,0.3);
 }
 
-/* Troféus/emojis */
+/* Troféu (medalha/emoji) */
 .posicao .trofeu {
   font-size: 4em;
   margin-bottom: 10px;
+  filter: drop-shadow(0 0 8px rgba(255,215,0,0.4));
 }
 
-/* Cores das medalhas */
-.posicao.ouro .trofeu { color: #FFD700; }
-.posicao.prata .trofeu { color: #C0C0C0; }
-.posicao.bronze .trofeu { color: #cd7f32; }
+/* Destaques para os três primeiros lugares */
+.posicao.ouro {
+  border-color: #FFD700;
+  background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.03));
+  box-shadow: 0 0 25px rgba(255,215,0,0.4);
+}
 
-.posicao h2 {
+.posicao.prata {
+  border-color: #C0C0C0;
+  background: linear-gradient(135deg, rgba(192,192,192,0.1), rgba(192,192,192,0.03));
+  box-shadow: 0 0 20px rgba(192,192,192,0.3);
+}
+
+.posicao.bronze {
+  border-color: #cd7f32;
+  background: linear-gradient(135deg, rgba(205,127,50,0.1), rgba(205,127,50,0.03));
+  box-shadow: 0 0 20px rgba(205,127,50,0.3);
+}
+
+.posicao .nome-participante {
   color: var(--dourado);
-  margin: 8px 0 4px;
+  font-weight: 700;
   font-size: 1.2em;
+  margin: 8px 0 4px;
+  text-align: center;
 }
 
-.posicao p {
-  color: #ccc;
+.posicao .pontos-participante {
+  color: var(--texto-secundario);
   font-size: 1em;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 /* ====== MENSAGEM QUANDO VAZIO ====== */
 .podio-vazio {
-  color: #aaa;
-  font-size: 1.2em;
+  color: var(--texto-terciario);
+  font-size: 1.1em;
   margin-top: 40px;
+  padding: 30px;
+  background: var(--vidro-claro);
+  border-radius: 20px;
+  border: 1px solid var(--borda-vidro);
+}
+
+.podio-vazio p {
+  margin-bottom: 10px;
+}
+
+/* ====== ANIMAÇÃO DE ENTRADA (USADA PELO JS) ====== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ====== RESPONSIVIDADE ====== */
@@ -75,8 +119,13 @@
   .podio {
     flex-direction: column;
     align-items: center;
+    gap: 12px;
   }
   .posicao {
-    width: 80%;
+    width: 90%;
+    min-width: auto;
+  }
+  .posicao .trofeu {
+    font-size: 3em;
   }
 }

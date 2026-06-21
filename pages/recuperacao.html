@@ -7,43 +7,80 @@
   <link rel="stylesheet" href="../css/comum.css">
   <link rel="manifest" href="../manifest.json">
   <style>
-    .recuperar-container {
-      max-width: 450px;
-      margin: 80px auto;
-      text-align: center;
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
     }
-    .recuperar-container h2 {
-      color: var(--dourado);
-      margin-bottom: 10px;
-    }
-    .recuperar-container p {
-      color: var(--texto-secundario);
-      margin-bottom: 20px;
-      font-size: 0.9em;
-    }
-    .recuperar-container .btn {
+    .recuperacao-container {
+      max-width: 440px;
       width: 100%;
+      text-align: center;
+      animation: fadeIn 0.5s ease;
     }
-    .link-voltar {
+    .recuperacao-container img {
+      width: 70px;
+      margin-bottom: 15px;
+    }
+    .recuperacao-container h2 {
+      color: var(--dourado);
+      margin-bottom: 8px;
+      font-size: 1.5em;
+    }
+    .recuperacao-container p {
+      color: var(--texto-secundario);
+      margin-bottom: 24px;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+    .recuperacao-container input {
+      margin-bottom: 16px;
+    }
+    .recuperacao-container .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 1em;
+    }
+    .mensagem {
+      margin-top: 16px;
+      font-weight: 600;
+    }
+    .link-login {
       display: block;
-      margin-top: 15px;
+      margin-top: 20px;
       color: var(--dourado);
       text-decoration: none;
+      font-size: 0.9em;
       font-weight: 500;
     }
-    .link-voltar:hover {
+    .link-login:hover {
       text-decoration: underline;
+    }
+    .logo-fallback {
+      font-size: 3em;
+      color: var(--dourado);
+      display: none;
+      margin-bottom: 15px;
     }
   </style>
 </head>
 <body>
-  <div class="recuperar-container glass">
-    <h2>🔑 Recuperar senha</h2>
-    <p>Insira o seu email para receber um código de recuperação.</p>
-    <input type="email" id="emailRec" placeholder="Seu email">
-    <button class="btn" id="btnRecuperar">Enviar código</button>
-    <p id="msg" style="margin-top:15px;"></p>
-    <a href="login.html" class="link-voltar">← Voltar ao login</a>
+  <div class="recuperacao-container glass">
+    <img src="../assets/imagens/logo.png" alt="NG Logo" id="logo-img"
+         onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block';">
+    <div id="logo-fallback" class="logo-fallback">⚜️</div>
+
+    <h2>🔑 Recuperar Senha</h2>
+    <p>Insira o seu email cadastrado. Enviaremos um link para redefinir a sua senha.</p>
+
+    <input type="email" id="emailRecuperacao" placeholder="seu@email.com" autocomplete="email">
+    <button class="btn" id="btnRecuperar">📧 Enviar Link</button>
+    
+    <div id="mensagemStatus" class="mensagem"></div>
+    
+    <a href="login.html" class="link-login">← Voltar ao Login</a>
   </div>
 
   <div class="creditos">
@@ -51,8 +88,8 @@
     © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
   </div>
 
-  <script src="../js/api.js"></script>
   <script src="../js/utils.js"></script>
+  <script src="../js/api.js"></script>
   <script>
     document.getElementById('ano').textContent = new Date().getFullYear();
 
@@ -60,38 +97,50 @@
       navigator.serviceWorker.register('../sw.js');
     }
 
-    document.getElementById('btnRecuperar').addEventListener('click', async () => {
-      const email = document.getElementById('emailRec').value.trim();
-      const msg = document.getElementById('msg');
+    const btn = document.getElementById('btnRecuperar');
+    const msg = document.getElementById('mensagemStatus');
+
+    btn.addEventListener('click', async () => {
+      const email = document.getElementById('emailRecuperacao').value.trim();
       
       if (!email) {
-        msg.textContent = '⚠️ Insira um email válido.';
-        msg.className = 'erro';
+        msg.textContent = '⚠️ Insira um email.';
+        msg.className = 'mensagem erro';
         return;
       }
 
       if (!validarEmail(email)) {
-        msg.textContent = '⚠️ Formato de email inválido.';
-        msg.className = 'erro';
+        msg.textContent = '📧 Email inválido. Verifique o formato.';
+        msg.className = 'mensagem erro';
         return;
       }
 
-      const btn = document.getElementById('btnRecuperar');
       btn.disabled = true;
       btn.textContent = '⏳ Enviando...';
 
-      const res = await api.recuperarSenha(email);
-      
-      btn.disabled = false;
-      btn.textContent = 'Enviar código';
-
-      if (res.erro) {
-        msg.textContent = res.erro;
-        msg.className = 'erro';
-      } else {
-        msg.textContent = '✅ Código enviado! Verifique o seu email/WhatsApp.';
-        msg.className = 'sucesso';
+      try {
+        const res = await api.recuperarSenha(email);
+        
+        if (res.erro) {
+          msg.textContent = res.erro;
+          msg.className = 'mensagem erro';
+        } else {
+          msg.textContent = res.mensagem || '✅ Link de recuperação enviado! Verifique o seu email.';
+          msg.className = 'mensagem sucesso';
+          document.getElementById('emailRecuperacao').value = '';
+        }
+      } catch (err) {
+        msg.textContent = '❌ Erro ao conectar. Verifique sua internet.';
+        msg.className = 'mensagem erro';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📧 Enviar Link';
       }
+    });
+
+    // Enter para submeter
+    document.getElementById('emailRecuperacao').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btn.click();
     });
   </script>
 </body>

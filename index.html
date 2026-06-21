@@ -7,30 +7,51 @@
   <link rel="stylesheet" href="css/comum.css">
   <link rel="manifest" href="manifest.json">
   <style>
+    :root {
+      --dourado: #FFD700;
+      --bg: #000;
+      --texto-claro: #ccc;
+    }
     body { 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       height: 100vh; 
-      background: #000; 
+      background: var(--bg); 
       flex-direction: column; 
       overflow: hidden;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      margin: 0;
     }
     .splash { 
       text-align: center; 
       animation: fadeIn 1s ease;
     }
-    .splash img { 
+    .splash img, .splash .logo-fallback { 
       width: 120px; 
+      height: 120px;
+      object-fit: contain;
       animation: girar 2s linear infinite; 
       filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));
+    }
+    .splash .logo-fallback {
+      font-size: 4em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--dourado);
+      background: rgba(255,215,0,0.1);
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
     }
     @keyframes girar { 
       from { transform: rotate(0deg); } 
       to { transform: rotate(360deg); } 
     }
     .splash p { 
-      color: #FFD700; 
+      color: var(--dourado); 
       margin-top: 20px; 
       font-size: 1.2em;
       animation: pulse 1.5s ease-in-out infinite;
@@ -40,22 +61,19 @@
       50% { opacity: 1; }
     }
     .barra-progresso {
-      width: 200px;
-      height: 3px;
-      background: rgba(255,215,0,0.2);
-      border-radius: 2px;
-      margin-top: 20px;
+      width: 220px;
+      height: 4px;
+      background: rgba(255,215,0,0.15);
+      border-radius: 3px;
+      margin-top: 24px;
       overflow: hidden;
     }
     .barra-progresso div {
       height: 100%;
       background: var(--dourado);
-      border-radius: 2px;
-      animation: carregar 2.5s ease-in-out forwards;
-    }
-    @keyframes carregar {
-      from { width: 0%; }
-      to { width: 100%; }
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.3s ease;
     }
     .branding {
       position: fixed;
@@ -63,8 +81,9 @@
       left: 0;
       right: 0;
       text-align: center;
-      color: #ccc;
+      color: var(--texto-claro);
       font-size: 0.85em;
+      opacity: 0.8;
     }
     .branding .verified { 
       color: #4caf50; 
@@ -75,20 +94,33 @@
       position: fixed;
       top: 15px;
       right: 15px;
-      color: rgba(255,215,0,0.6);
+      color: rgba(255,215,0,0.5);
       font-size: 0.7em;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', monospace;
+      letter-spacing: 0.5px;
+    }
+    .debug-info {
+      display: none;
+      position: fixed;
+      bottom: 50px;
+      left: 10px;
+      color: #888;
+      font-size: 0.65em;
+      text-align: left;
+      max-width: 200px;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
   <div class="splash">
-    <img src="assets/imagens/logo.png" alt="NG Logo" 
-         onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-    <div style="display:none; color:#FFD700; font-size:2em;">⚜️</div>
-    <p>A carregar...</p>
+    <!-- Logo com fallback automático -->
+    <img src="assets/imagens/logo.png" alt="NG Logo" id="logo-img"
+         onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex';">
+    <div id="logo-fallback" class="logo-fallback" style="display:none;">⚜️</div>
+    <p id="status-texto">A preparar o seu painel...</p>
     <div class="barra-progresso">
-      <div></div>
+      <div id="barra-preenchimento"></div>
     </div>
   </div>
 
@@ -99,24 +131,185 @@
     © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
   </div>
 
-  <script src="js/utils.js"></script>
+  <div class="debug-info" id="debug-info"></div>
+
+  <!-- ====== SCRIPTS ESSENCIAIS ====== -->
   <script>
+    // ----- Configuração inicial robusta -----
+    window.NG = window.NG || {};
+    window.NG.debug = false; // Alterne para true para ver logs
+
+    const barra = document.getElementById('barra-preenchimento');
+    const statusTexto = document.getElementById('status-texto');
+    const debugInfo = document.getElementById('debug-info');
+    let progresso = 0;
+    let scriptsCarregados = 0;
+    const totalScripts = 3; // utils.js, api.js, auth.js (carregados dinamicamente)
+
+    function atualizarProgresso(valor, mensagem) {
+      progresso = Math.min(valor, 100);
+      barra.style.width = progresso + '%';
+      if (mensagem) statusTexto.textContent = mensagem;
+    }
+
+    function logDebug(msg) {
+      if (window.NG.debug) {
+        console.log('[Splash]', msg);
+        debugInfo.style.display = 'block';
+        debugInfo.textContent += msg + '\n';
+      }
+    }
+
+    // Exibir ano
     document.getElementById('ano').textContent = new Date().getFullYear();
 
-    setTimeout(() => {
-      window.location.href = 'pages/login.html';
-    }, 2500);
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(() => {
-        console.log('✅ Service Worker registado');
-      }).catch(err => {
-        console.log('⚠️ Service Worker:', err);
+    // ----- Carregamento dinâmico de scripts com progresso real -----
+    function carregarScript(url) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = () => {
+          scriptsCarregados++;
+          const percent = 30 + (scriptsCarregados / totalScripts) * 40; // 30% a 70% nos scripts
+          atualizarProgresso(percent, 'A carregar funcionalidades...');
+          logDebug(`✔️ ${url} carregado (${scriptsCarregados}/${totalScripts})`);
+          resolve();
+        };
+        script.onerror = () => {
+          logDebug(`❌ Falha ao carregar: ${url}`);
+          // Continua mesmo com falha, mas regista
+          scriptsCarregados++;
+          const percent = 30 + (scriptsCarregados / totalScripts) * 40;
+          atualizarProgresso(percent, 'A carregar funcionalidades...');
+          resolve(); // Não rejeita para não travar tudo
+        };
+        document.head.appendChild(script);
       });
     }
 
-    inicializarTema();
-    criarToggleTema();
+    // ----- Inicialização de Tema (fallback inline) -----
+    function inicializarTema() {
+      // Verifica se a função já existe em utils.js; senão, usa fallback inline
+      if (typeof window.inicializarTema === 'function') {
+        window.inicializarTema();
+      } else {
+        // Fallback básico se utils.js não carregou
+        const tema = localStorage.getItem('ng-tema') || 'escuro';
+        document.documentElement.setAttribute('data-tema', tema);
+        if (tema === 'claro') {
+          document.documentElement.style.setProperty('--bg', '#f5f5f5');
+          document.documentElement.style.setProperty('--texto-claro', '#555');
+        }
+        logDebug('Tema inicializado via fallback inline');
+      }
+    }
+
+    function criarToggleTema() {
+      if (typeof window.criarToggleTema === 'function') {
+        window.criarToggleTema();
+      } else {
+        logDebug('Toggle de tema não disponível (será criado na página principal)');
+      }
+    }
+
+    // ----- Service Worker -----
+    async function registrarSW() {
+      if (!('serviceWorker' in navigator)) {
+        logDebug('⚠️ Service Worker não suportado');
+        return false;
+      }
+      try {
+        const registro = await navigator.serviceWorker.register('sw.js');
+        logDebug('✅ SW registado: ' + registro.scope);
+        return true;
+      } catch (err) {
+        logDebug('⚠️ SW falhou: ' + err.message);
+        return false;
+      }
+    }
+
+    // ----- Sequência de inicialização -----
+    async function inicializarApp() {
+      atualizarProgresso(10, 'A ligar ao servidor...');
+
+      // Registar Service Worker em paralelo (não bloqueia)
+      const swPromise = registrarSW();
+
+      // Carregar scripts essenciais em paralelo
+      await Promise.all([
+        carregarScript('js/utils.js'),
+        carregarScript('js/api.js'),
+        carregarScript('js/auth.js')
+      ]);
+      
+      atualizarProgresso(75, 'Quase pronto...');
+
+      // Aguardar SW (se possível)
+      const swOk = await swPromise;
+      if (swOk) {
+        // Pequena espera para SW ativar (útil para cache inicial)
+        await new Promise(r => setTimeout(r, 300));
+      }
+
+      atualizarProgresso(90, 'A preparar o painel...');
+
+      // Inicializar tema (utils.js já deve estar disponível)
+      inicializarTema();
+      criarToggleTema();
+
+      // Últimos preparos
+      await new Promise(r => setTimeout(r, 200));
+      atualizarProgresso(100, 'Bem-vindo!');
+
+      // Redirecionar
+      setTimeout(() => {
+        window.location.href = 'pages/login.html';
+      }, 600);
+    }
+
+    // Iniciar tudo quando a página carregar
+    window.addEventListener('DOMContentLoaded', () => {
+      // Fallback de segurança: se algo travar, redireciona após 5s
+      const timeoutFallback = setTimeout(() => {
+        logDebug('⏰ Timeout de segurança atingido, redirecionando...');
+        window.location.href = 'pages/login.html';
+      }, 5000);
+
+      inicializarApp().then(() => {
+        clearTimeout(timeoutFallback);
+      }).catch(err => {
+        logDebug('❌ Erro na inicialização: ' + err.message);
+        clearTimeout(timeoutFallback);
+        window.location.href = 'pages/login.html'; // Redireciona mesmo com erro
+      });
+    });
+
+    // ----- Tema toggle inline (provisório, será substituído por utils.js) -----
+    // Caso a função global não exista, adicionamos uma básica
+    window.criarToggleTema = window.criarToggleTema || function() {
+      if (document.getElementById('toggle-tema-inline')) return;
+      const btn = document.createElement('button');
+      btn.id = 'toggle-tema-inline';
+      btn.textContent = '🌓';
+      btn.style.cssText = 'position:fixed;top:15px;left:15px;z-index:9999;background:rgba(255,255,255,0.1);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;color:#fff;';
+      btn.onclick = function() {
+        const atual = document.documentElement.getAttribute('data-tema') || 'escuro';
+        const novo = atual === 'escuro' ? 'claro' : 'escuro';
+        document.documentElement.setAttribute('data-tema', novo);
+        localStorage.setItem('ng-tema', novo);
+        if (novo === 'claro') {
+          document.documentElement.style.setProperty('--bg', '#f5f5f5');
+          document.documentElement.style.setProperty('--texto-claro', '#555');
+        } else {
+          document.documentElement.style.setProperty('--bg', '#000');
+          document.documentElement.style.setProperty('--texto-claro', '#ccc');
+        }
+      };
+      document.body.appendChild(btn);
+    };
+
+    // Expor funções globais que podem ser sobrescritas por utils.js
+    window.inicializarTema = window.inicializarTema || inicializarTema;
   </script>
 </body>
 </html>

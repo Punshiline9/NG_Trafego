@@ -1,128 +1,168 @@
-/* ====== CONTAINER DO PAINEL ====== */
+/* ====== PAINEL DO PARTICIPANTE ====== */
 .painel {
   max-width: 960px;
   margin: 20px auto;
+  padding: 0 16px;
   animation: fadeIn 0.5s ease;
 }
 
-.painel h2 {
-  color: var(--dourado);
-  margin-bottom: 8px;
-  font-size: 1.4em;
+/* ====== CABEÇALHO DO PAINEL ====== */
+.painel-cabecalho {
   display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* ====== CABEÇALHO DO USUÁRIO ====== */
-.cabecalho-usuario {
-  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
   margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 10px;
 }
 
-.cabecalho-usuario .info-user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.saudacao h1 {
+  color: var(--texto);
+  font-size: 1.5em;
+  margin: 0 0 4px;
 }
 
-.cabecalho-usuario .avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--dourado), var(--dourado-escuro));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6em;
-  font-weight: 700;
-  color: #000;
-  border: 2px solid var(--dourado);
-  box-shadow: 0 0 15px rgba(255,215,0,0.4);
-}
-
-.cabecalho-usuario .detalhes small {
-  color: var(--texto-terciario);
-  font-size: 0.8em;
-}
-
-/* ====== SINO DE NOTIFICAÇÕES ====== */
-.sino-notificacoes {
-  position: relative;
-  cursor: pointer;
-  font-size: 1.6em;
-  transition: transform 0.3s;
-}
-
-.sino-notificacoes:hover {
-  transform: scale(1.1) rotate(10deg);
-}
-
-.sino-notificacoes .badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: var(--erro);
-  color: #fff;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 0.55em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  border: 2px solid #000;
-  animation: pulse 2s infinite;
-}
-
-/* ====== GRID DE ESTATÍSTICAS (4 CARTÕES) ====== */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.stat-card {
-  background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(0,0,0,0.3));
-  border: 1px solid var(--borda-vidro);
-  border-radius: 14px;
-  padding: 16px;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  border-color: var(--dourado);
-  transform: translateY(-3px);
-  box-shadow: var(--sombra-dourada);
-}
-
-.stat-card .stat-icone {
-  font-size: 1.8em;
-  margin-bottom: 6px;
-}
-
-.stat-card .stat-valor {
+.saudacao #nomeParticipante {
   color: var(--dourado);
-  font-size: 1.3em;
-  font-weight: 800;
+  font-weight: 700;
 }
 
-.stat-card .stat-label {
+.id-usuario {
   color: var(--texto-terciario);
-  font-size: 0.75em;
-  margin-top: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.85em;
 }
 
-/* ====== CARDS DE TAREFAS PREMIUM ====== */
+.resumo-rapido {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.resumo-item {
+  text-align: center;
+  min-width: 70px;
+}
+
+.resumo-icone {
+  font-size: 1.5em;
+}
+
+.resumo-valor {
+  display: block;
+  font-size: 1.3em;
+  font-weight: 700;
+  color: var(--dourado);
+}
+
+.resumo-label {
+  font-size: 0.7em;
+  color: var(--texto-terciario);
+  text-transform: uppercase;
+}
+
+/* ====== BARRA DE PROGRESSO DO NÍVEL ====== */
+.barra-nivel-container {
+  width: 100%;
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  height: 20px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--borda-vidro);
+}
+
+.barra-nivel-preenchida {
+  height: 100%;
+  background: linear-gradient(90deg, var(--dourado), var(--dourado-claro));
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+.barra-nivel-texto {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7em;
+  font-weight: 600;
+  color: #000;
+  line-height: 20px;
+  text-shadow: 0 0 4px rgba(255,255,255,0.5);
+}
+
+/* ====== BOTÃO MODO FOCO ====== */
+#btnModoFoco {
+  background: transparent;
+  border: 2px solid var(--borda-vidro);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto-secundario);
+}
+
+#btnModoFoco:hover,
+#btnModoFoco.ativo {
+  border-color: var(--dourado);
+  color: var(--dourado);
+  box-shadow: 0 0 12px var(--dourado);
+}
+
+/* ====== ANÚNCIOS ROLANTES (sobrescreve se necessário) ====== */
+/* O comum.css já define .anuncios-rolantes e .anuncio-btn */
+#anunciosRolantes {
+  margin-bottom: 20px;
+}
+
+/* ====== PAINEL PRINCIPAL ====== */
+.painel-principal {
+  padding: 20px;
+}
+
+/* ====== BUSCA DE TAREFAS ====== */
+.busca-tarefas {
+  margin-bottom: 20px;
+}
+
+/* ====== LAYOUT DE TAREFAS COM SIDEBAR ====== */
+.tarefas-layout {
+  display: flex;
+  gap: 20px;
+}
+
+.lista-tarefas {
+  flex: 1;
+}
+
+/* Sidebar de detalhes (sobrescreve a genérica) */
+.sidebar-overlay {
+  width: 350px;
+  border-left: 2px solid var(--borda-vidro-forte);
+}
+
+.sidebar-conteudo {
+  padding: 20px;
+}
+
+.sidebar-fechar {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: var(--texto-secundario);
+  font-size: 1.4em;
+  cursor: pointer;
+}
+
+/* ====== CARDS DE TAREFAS ====== */
 .card-tarefa {
   background: linear-gradient(135deg, rgba(30,30,30,0.9), rgba(10,10,10,0.9));
   border: 2px solid var(--borda-vidro);
@@ -131,9 +171,9 @@
   padding: 18px;
   margin-bottom: 12px;
   transition: all 0.3s ease;
+  cursor: pointer;
   position: relative;
   overflow: hidden;
-  cursor: pointer;
 }
 
 .card-tarefa::after {
@@ -217,7 +257,7 @@
   box-shadow: 0 0 20px rgba(255,215,0,0.5);
 }
 
-/* ====== BARRA DE PROGRESSO ====== */
+/* ====== PROGRESSO (barra interna das tarefas) ====== */
 .progresso {
   background: rgba(255,255,255,0.05);
   height: 8px;
@@ -233,62 +273,65 @@
   transition: width 0.8s ease;
 }
 
-/* ====== FORMULÁRIO DE ENVIO ====== */
-.form-envio {
-  margin-top: 20px;
-  animation: fadeIn 0.4s ease;
+/* ====== ABA PARTICIPANTES ====== */
+.lista-participantes-container {
+  margin-top: 10px;
 }
 
-.form-envio label {
-  display: block;
-  color: var(--dourado);
-  margin-bottom: 6px;
-  font-weight: 600;
-}
-
-.form-envio textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-/* ====== EQUIPA ====== */
-.equipa-lista {
+.lista-participantes {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
-  margin-top: 20px;
 }
 
-.membro-equipa {
-  background: rgba(255, 255, 255, 0.03);
+.card-participante {
+  background: var(--vidro-claro);
   border: 1px solid var(--borda-vidro);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   text-align: center;
   transition: all 0.3s;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
 }
 
-.membro-equipa:hover {
+.card-participante:hover {
   border-color: var(--dourado);
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: var(--sombra-dourada);
 }
 
-.membro-equipa .bandeira {
-  font-size: 2.5em;
-  filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+.card-participante .avatar-emoji {
+  font-size: 2.8em;
+  filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
 }
 
-.membro-equipa .nome {
+.card-participante .nome-participante {
   color: var(--dourado);
-  margin-top: 8px;
-  font-weight: 600;
+  font-weight: 700;
+  margin-top: 6px;
 }
 
-.membro-equipa .status-equipa {
+.card-participante .status-participante {
   color: var(--sucesso);
   font-size: 0.8em;
   margin-top: 4px;
+}
+
+/* ====== FORMULÁRIOS EM GERAL ====== */
+#formEnvio,
+#formEspecial,
+#formAplicativo,
+#formReclamacao,
+#formPerfil {
+  margin-top: 15px;
+}
+
+.status-envio,
+#statusSaque,
+#statusPerfil {
+  margin-top: 15px;
+  font-weight: 600;
 }
 
 /* ====== RESGATE ====== */
@@ -307,71 +350,25 @@
   margin-top: 20px;
 }
 
-.resgate-opcoes button {
-  flex: 1;
+/* ====== UPLOAD DE APLICATIVO ====== */
+.upload-app-container {
+  margin-bottom: 20px;
 }
 
-/* ====== INFORMAÇÕES ====== */
-.info-texto {
-  line-height: 1.8;
-  color: var(--texto-secundario);
+/* ====== CONTEÚDO DE DICA ====== */
+.conteudo-dica {
+  padding: 15px;
+  line-height: 1.7;
 }
 
-.info-texto h3 {
-  color: var(--dourado);
-  margin: 20px 0 10px;
-  font-size: 1.2em;
+/* ====== SELEÇÃO DE TEMA ====== */
+.selecao-tema {
+  margin: 20px 0;
 }
 
-.info-texto ul {
-  margin-left: 20px;
-  margin-bottom: 15px;
-}
-
-.info-texto li {
-  margin-bottom: 6px;
-}
-
-/* ====== TOAST NOTIFICATION ====== */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 99999;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.toast {
-  background: var(--vidro);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--borda-vidro-forte);
-  border-radius: 12px;
-  padding: 14px 20px;
-  color: var(--texto);
-  font-weight: 500;
-  font-size: 0.9em;
-  min-width: 280px;
-  box-shadow: var(--sombra);
-  animation: slideInRight 0.3s ease, fadeOut 0.3s 2.7s forwards;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.toast.sucesso { border-left: 4px solid var(--sucesso); }
-.toast.erro { border-left: 4px solid var(--erro); }
-.toast.aviso { border-left: 4px solid var(--aviso); }
-
-@keyframes slideInRight {
-  from { transform: translateX(120%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; transform: translateY(-10px); }
+/* ====== PERFIL (já definido em comum.css, apenas reforço) ====== */
+.foto-perfil-container {
+  margin-bottom: 20px;
 }
 
 /* ====== CONFETTI ====== */
@@ -397,31 +394,27 @@
   100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
-/* ====== RODAPÉ DO PAINEL ====== */
-.painel-rodape {
-  margin-top: 30px;
-  text-align: center;
-  color: var(--texto-terciario);
-  font-size: 0.8em;
-}
-
 /* ====== RESPONSIVIDADE ====== */
 @media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+  .tarefas-layout {
+    flex-direction: column;
   }
 
-  .stat-card {
-    padding: 12px 8px;
+  .sidebar-overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    transform: translateX(100%);
   }
 
-  .stat-card .stat-valor {
-    font-size: 1.1em;
+  .sidebar-overlay.ativo {
+    transform: translateX(0);
   }
 
-  .equipa-lista {
-    grid-template-columns: 1fr;
+  .lista-participantes {
+    grid-template-columns: 1fr 1fr;
   }
 
   .resgate-opcoes {
@@ -431,15 +424,18 @@
   .card-tarefa {
     padding: 14px;
   }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 400px) {
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
+  .lista-participantes {
+    grid-template-columns: 1fr;
   }
 
-  .cabecalho-usuario {
+  .painel-cabecalho {
     flex-direction: column;
     align-items: flex-start;
   }
