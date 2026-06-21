@@ -1,19 +1,26 @@
 // =============================================
-// 👤 NG TRAFEGO - PAINEL DO PARTICIPANTE
+// 👤 NG TAREFAS - PAINEL DO PARTICIPANTE (VERSÃO REFORÇADA COM METAS, REPUTAÇÃO, E-MAIL, CALENDÁRIO)
 // =============================================
 
 let tarefasCache = [];
 let notificacoes = [];
-let sidebarAberta = false;
+let participantesCache = [];
+let usuarioAtual = null;
+let chatAberto = false;
+let modoFoco = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = verificarAutenticacao();
   if (!usuario) return;
-  document.getElementById('nomeUser').textContent = usuario.nome || usuario.user;
+  usuarioAtual = usuario;
 
-  criarCabecalhoPremium(usuario);
-  criarSidebarExpansao(usuario);
+  preencherCabecalho(usuario);
+  configurarSidebarDetalhes();
   carregarNotificacoes();
+  carregarAnuncios();
+  configurarModoFoco();
+  configurarChatFlutuante(usuario);
+  configurarSeletorTemas();
 
   const botoesAbas = document.querySelectorAll('.abas button[data-aba]');
   const paineisAbas = document.querySelectorAll('.aba-painel');
@@ -27,14 +34,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const painel = document.getElementById(aba);
       if (painel) painel.classList.remove('oculto');
 
-      if (aba === 'tarefas') carregarTarefas(usuario.id);
-      if (aba === 'equipa') carregarEquipa(usuario.id);
-      if (aba === 'resgate') carregarSaldo(usuario.id);
-      if (aba === 'info') carregarInfo();
+      switch(aba) {
+        case 'perfil': preencherFormularioPerfil(usuario); break;
+        case 'tarefas': carregarTarefas(usuario.id); break;
+        case 'enviar': carregarTarefasSelect(usuario.id); break;
+        case 'participantes': carregarParticipantes(usuario.id); break;
+        case 'especiais': configurarTarefasEspeciais(usuario.id); break;
+        case 'dicas': configurarDicas(usuario.id); break;
+        case 'resgate': carregarSaldo(usuario.id); break;
+      }
     });
   });
 
-  carregarTarefas(usuario.id);
+  document.querySelector('.abas button[data-aba="tarefas"]')?.click();
 
   const buscaInput = document.getElementById('buscaTarefas');
   if (buscaInput) {
@@ -50,71 +62,259 @@ document.addEventListener('DOMContentLoaded', () => {
       await submeterComprovativo(usuario.id);
     });
   }
+
+  document.getElementById('btnLogout')?.addEventListener('click', () => logout());
 });
 
-// ====== CABEÇALHO PREMIUM ======
-function criarCabecalhoPremium(usuario) {
-  const h2 = document.querySelector('.painel h2');
-  if (!h2) return;
-  
-  h2.innerHTML = `
-    <div class="cabecalho-usuario" style="width:100%;">
-      <div class="info-user">
-        <div class="avatar">${(usuario.nome || usuario.user).charAt(0).toUpperCase()}</div>
-        <div class="detalhes">
-          <span style="color:var(--dourado);font-weight:700;">${escapeHTML(usuario.nome || usuario.user)}</span>
-          <br><small>${usuario.tipo === 'gestor' ? '🛡️ Gestor' : '👤 Participante'}</small>
-        </div>
-      </div>
-      <div class="sino-notificacoes" onclick="abrirNotificacoes()" title="Notificações">
-        🔔
-        <span class="badge oculto" id="badgeNotificacoes">0</span>
-      </div>
-    </div>
-  `;
+// ========== CABEÇALHO (PREENCHER) ==========
+function preencherCabecalho(usuario) {
+  document.getElementById('nomeParticipante').textContent = usuario.nome || usuario.user;
+  document.getElementById('idUsuario').textContent = `ID: #${usuario.id}`;
+  document.getElementById('saldoAtual').textContent = formatarMoeda(usuario.saldo || 0);
+  document.getElementById('nivelAtual').textContent = usuario.nivel || 'Bronze';
+  // Reputação
+  document.getElementById('reputacao').textContent = usuario.reputacao || '--';
+  const pontos = usuario.pontos || 0;
+  const proximoNivel = usuario.proximoNivel || 100;
+  const progresso = Math.min((pontos / proximoNivel) * 100, 100);
+  document.getElementById('barraNivel').style.width = `${progresso}%`;
+  document.getElementById('pontosNivel').textContent = `${pontos} / ${proximoNivel} pontos`;
 }
 
-// ====== SIDEBAR EXPANSÃO ======
-function criarSidebarExpansao(usuario) {
-  const toggle = document.createElement('button');
-  toggle.className = 'sidebar-toggle';
-  toggle.textContent = '◀';
-  toggle.title = 'Painel de Expansão';
-  toggle.onclick = toggleSidebar;
-  document.body.appendChild(toggle);
-  
-  const sidebar = document.createElement('div');
-  sidebar.className = 'sidebar-overlay';
-  sidebar.id = 'sidebarExpansao';
-  sidebar.innerHTML = `
-    <h3 style="color:var(--dourado);margin-bottom:20px;">📊 Detalhes</h3>
-    <div id="sidebarConteudo">
-      <p style="color:var(--texto-secundario);">Selecione uma tarefa para ver detalhes.</p>
-    </div>
-  `;
-  document.body.appendChild(sidebar);
+// ========== SIDEBAR DE DETALHES ==========
+function configurarSidebarDetalhes() {
+  const toggle = document.querySelector('.sidebar-toggle');
+  if (toggle) toggle.addEventListener('click', toggleSidebar);
 }
 
 function toggleSidebar() {
-  const sidebar = document.getElementById('sidebarExpansao');
+  const sidebar = document.getElementById('sidebarDetalhes');
   const toggle = document.querySelector('.sidebar-toggle');
-  sidebarAberta = !sidebarAberta;
-  
-  if (sidebarAberta) {
-    sidebar.classList.add('ativo');
-    toggle.textContent = '▶';
-  } else {
-    sidebar.classList.remove('ativo');
-    toggle.textContent = '◀';
-  }
+  if (!sidebar || !toggle) return;
+  sidebar.classList.toggle('ativo');
+  toggle.textContent = sidebar.classList.contains('ativo') ? '✖' : '❗';
 }
 
-// ====== TAREFAS E BUSCA ======
+// ========== MODO FOCO ==========
+function configurarModoFoco() {
+  const btn = document.getElementById('btnModoFoco');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    modoFoco = !modoFoco;
+    btn.classList.toggle('ativo', modoFoco);
+    document.getElementById('anunciosRolantes')?.classList.toggle('oculto', modoFoco);
+    document.querySelector('.whatsapp-float')?.classList.toggle('oculto', modoFoco);
+    document.querySelector('.chat-float-btn')?.classList.toggle('oculto', modoFoco);
+    document.getElementById('chatJanela')?.classList.remove('ativo');
+    mostrarToast(modoFoco ? 'Modo Foco ativado' : 'Modo Foco desativado', 'info');
+  });
+}
+
+// ========== SELEÇÃO DE TEMA ==========
+function configurarSeletorTemas() {
+  const opcoes = document.querySelectorAll('.opcao-tema');
+  const temaAtual = document.documentElement.getAttribute('data-theme') || 'dark';
+  opcoes.forEach(op => {
+    op.classList.toggle('ativo', op.dataset.tema === temaAtual);
+    op.addEventListener('click', () => {
+      aplicarTema(op.dataset.tema);
+      opcoes.forEach(o => o.classList.remove('ativo'));
+      op.classList.add('ativo');
+    });
+  });
+}
+
+// ========== CHAT FLUTUANTE ==========
+function configurarChatFlutuante(usuario) {
+  const btn = document.getElementById('btnChatFloat');
+  const janela = document.getElementById('chatJanela');
+  const fechar = document.getElementById('chatFechar');
+  const enviar = document.getElementById('chatEnviar');
+  const input = document.getElementById('chatInput');
+
+  if (!btn || !janela) return;
+
+  btn.addEventListener('click', () => {
+    chatAberto = !chatAberto;
+    janela.classList.toggle('ativo', chatAberto);
+    if (chatAberto) carregarMensagensChat(usuario.id);
+  });
+
+  fechar?.addEventListener('click', () => {
+    chatAberto = false;
+    janela.classList.remove('ativo');
+  });
+
+  enviar?.addEventListener('click', async () => {
+    const texto = input.value.trim();
+    if (!texto) return;
+    const res = await api.enviarMensagem({ userId: usuario.id, destinatarioId: null, texto });
+    if (res.erro) {
+      mostrarToast(res.erro, 'erro');
+    } else {
+      input.value = '';
+      carregarMensagensChat(usuario.id);
+    }
+  });
+
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') enviar?.click();
+  });
+}
+
+async function carregarMensagensChat(userId) {
+  const container = document.getElementById('chatMensagens');
+  if (!container) return;
+  const res = await api.listarMensagens(userId);
+  if (res.erro) {
+    container.innerHTML = `<p class="erro">${res.erro}</p>`;
+    return;
+  }
+  const msgs = res.mensagens || [];
+  container.innerHTML = msgs.map(m => {
+    const classe = m.remetente === userId ? 'mensagem-enviada' : 'mensagem-recebida';
+    return `<div class="${classe}">${escapeHTML(m.texto)}</div>`;
+  }).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+// ========== PERFIL (COMPLETO COM REPUTAÇÃO, METAS, NOTIFICAÇÕES) ==========
+function preencherFormularioPerfil(usuario) {
+  document.getElementById('perfilNome').value = usuario.nome || '';
+  document.getElementById('perfilEmail').value = usuario.email || '';
+  const fotoPreview = document.getElementById('fotoPerfilPreview');
+  if (fotoPreview) {
+    fotoPreview.innerHTML = usuario.foto ? `<img src="${escapeHTML(usuario.foto)}" alt="Foto">` : (usuario.nome || usuario.user).charAt(0).toUpperCase();
+  }
+
+  // Checkbox de notificações por e-mail
+  document.getElementById('notifEmail').checked = usuario.notifEmail !== false;
+
+  // Reputação (barra + texto)
+  const reputacao = usuario.reputacao || 0;
+  document.getElementById('barraReputacao').style.width = `${reputacao}%`;
+  document.getElementById('textoReputacao').textContent = `${reputacao} pontos`;
+  if (reputacao > 80) document.getElementById('barraReputacao').style.background = 'var(--sucesso)';
+  else if (reputacao > 50) document.getElementById('barraReputacao').style.background = 'var(--aviso)';
+  else document.getElementById('barraReputacao').style.background = 'var(--erro)';
+
+  // Formulário de perfil (salvar)
+  document.getElementById('formPerfil').onsubmit = async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('perfilNome').value.trim();
+    const email = document.getElementById('perfilEmail').value.trim();
+    const senha = document.getElementById('perfilSenha').value;
+    const notifEmail = document.getElementById('notifEmail').checked;
+    if (!nome || !email) {
+      mostrarToast('Nome e email são obrigatórios.', 'aviso');
+      return;
+    }
+    if (!validarEmail(email)) {
+      mostrarToast('Email inválido.', 'erro');
+      return;
+    }
+    const dados = { nome, email, notifEmail };
+    if (senha && senha.length >= 6) dados.senha = senha;
+    const res = await api.atualizarPerfil(dados);
+    if (res.erro) {
+      mostrarToast(res.erro, 'erro');
+    } else {
+      mostrarToast('Perfil atualizado!', 'sucesso');
+      const sessao = obterSessao();
+      if (sessao) {
+        sessao.nome = nome;
+        sessao.email = email;
+        sessao.notifEmail = notifEmail;
+        salvarSessao(sessao, true);
+        preencherCabecalho(sessao);
+      }
+    }
+  };
+
+  // Upload de foto
+  document.getElementById('btnUploadFoto')?.addEventListener('click', () => {
+    document.getElementById('inputFotoPerfil')?.click();
+  });
+  document.getElementById('inputFotoPerfil')?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      mostrarToast('Foto deve ter no máximo 5MB.', 'erro');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result;
+      document.getElementById('fotoPerfilPreview').innerHTML = `<img src="${base64}" alt="Foto">`;
+      const res = await api.atualizarPerfil({ foto: base64 });
+      if (res.erro) mostrarToast(res.erro, 'erro');
+      else {
+        mostrarToast('Foto atualizada!', 'sucesso');
+        usuario.foto = base64;
+        preencherCabecalho(usuario);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Força da senha e toggle
+  atualizarForcaSenha('perfilSenha', 'forcaSenhaPerfil');
+  configurarToggleSenha('perfilSenha', 'toggleSenhaPerfil');
+
+  // Metas (carregar e salvar)
+  carregarMetas(usuario.id);
+  document.getElementById('btnSalvarMetas')?.addEventListener('click', async () => {
+    const diaria = document.getElementById('metaDiaria').value;
+    const semanal = document.getElementById('metaSemanal').value;
+    if (!diaria && !semanal) {
+      mostrarToast('Defina pelo menos uma meta.', 'aviso');
+      return;
+    }
+    const res = await api.salvarMetas({ userId: usuario.id, diaria, semanal });
+    if (res.erro) mostrarToast(res.erro, 'erro');
+    else {
+      mostrarToast('Metas guardadas!', 'sucesso');
+      carregarMetas(usuario.id);
+    }
+  });
+}
+
+async function carregarMetas(userId) {
+  const res = await api.verMetas(userId);
+  if (!res || res.erro) return;
+  document.getElementById('metaDiaria').value = res.metaDiaria || '';
+  document.getElementById('metaSemanal').value = res.metaSemanal || '';
+  document.getElementById('metaDiariaValor').textContent = formatarMoeda(res.metaDiaria || 0);
+  document.getElementById('metaSemanalValor').textContent = formatarMoeda(res.metaSemanal || 0);
+  document.getElementById('ganhoHoje').textContent = formatarMoeda(res.ganhoHoje || 0);
+  document.getElementById('ganhoSemana').textContent = formatarMoeda(res.ganhoSemana || 0);
+
+  const percDiario = res.metaDiaria ? Math.min((res.ganhoHoje / res.metaDiaria) * 100, 100) : 0;
+  const percSemanal = res.metaSemanal ? Math.min((res.ganhoSemana / res.metaSemanal) * 100, 100) : 0;
+  document.getElementById('barraDiaria').style.width = percDiario + '%';
+  document.getElementById('barraSemanal').style.width = percSemanal + '%';
+}
+
+function configurarToggleSenha(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (!input || !btn) return;
+  const alternar = () => {
+    const tipo = input.type === 'password' ? 'text' : 'password';
+    input.type = tipo;
+    btn.textContent = tipo === 'password' ? '👁️' : '🙈';
+  };
+  btn.addEventListener('click', alternar);
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternar(); }
+  });
+}
+
+// ========== TAREFAS (COM BOTÃO GOOGLE CALENDAR NOS DETALHES) ==========
 async function carregarTarefas(userId) {
   const container = document.getElementById('listaTarefas');
   if (!container) return;
-  container.innerHTML = '<div class="skeleton" style="height:60px;"></div><div class="skeleton" style="height:60px;margin-top:10px;"></div><div class="skeleton" style="height:60px;margin-top:10px;"></div>';
-  
+  container.innerHTML = '<div class="skeleton" style="height:60px;"></div><div class="skeleton" style="height:60px;margin-top:10px;"></div>';
   const resposta = await api.listarTarefas(userId);
   if (resposta.erro) {
     container.innerHTML = `<p class="erro">${resposta.erro}</p>`;
@@ -122,7 +322,7 @@ async function carregarTarefas(userId) {
   }
   tarefasCache = resposta.tarefas || [];
   exibirTarefas(tarefasCache);
-  atualizarStats(tarefasCache);
+  document.getElementById('tarefasHoje').textContent = '0';
 }
 
 function exibirTarefas(tarefas) {
@@ -132,27 +332,22 @@ function exibirTarefas(tarefas) {
     container.innerHTML = '<p style="text-align:center;color:var(--texto-terciario);">📭 Nenhuma tarefa disponível.</p>';
     return;
   }
-
   const emojis = ['🟪', '🧪', '🟢', '📱', '💻', '🎯', '📊', '🎨'];
-  
   container.innerHTML = tarefas.map((tarefa, i) => {
     const emoji = tarefa.emoji || emojis[i % emojis.length];
     const tempoEstimado = tarefa.tempoEstimado || 'N/D';
-    
     return `
-      <div class="card-tarefa" onclick="mostrarDetalhesTarefa('${tarefa.id}')">
+      <div class="card-tarefa glass" style="margin-bottom:12px;cursor:pointer;" onclick="mostrarDetalhesTarefa('${tarefa.id}')">
         <div class="tarefa-header">
           <span class="tarefa-emoji">${emoji}</span>
           <span class="valor">${formatarMoeda(tarefa.valor)}</span>
         </div>
         <strong>${escapeHTML(tarefa.titulo)}</strong>
         <p>${escapeHTML(tarefa.descricao || 'Sem descrição')}</p>
-        <div class="progresso">
-          <div style="width: ${Math.floor(Math.random() * 60 + 20)}%;"></div>
-        </div>
+        <div class="progresso"><div style="width: ${Math.floor(Math.random() * 40 + 30)}%;"></div></div>
         <div class="tarefa-footer">
-          <span class="tarefa-tempo">🕒 ${tempoEstimado} | 🏷️ ${tarefa.nivel || 'Todos'}</span>
-          <button class="btn-tarefa" onclick="event.stopPropagation();iniciarTarefa('${tarefa.id}')">➡️</button>
+          <span>🕒 ${tempoEstimado} | 🏷️ ${tarefa.nivel || 'Todos'}</span>
+          <button class="btn btn-sm" onclick="event.stopPropagation();iniciarTarefa('${tarefa.id}')">➡️</button>
         </div>
       </div>
     `;
@@ -164,237 +359,378 @@ function filtrarTarefas(termo) {
     exibirTarefas(tarefasCache);
     return;
   }
-  const filtradas = tarefasCache.filter(t => {
-    return (t.titulo || '').toLowerCase().includes(termo) ||
-           (t.descricao || '').toLowerCase().includes(termo) ||
-           (t.nivel || '').toLowerCase().includes(termo);
-  });
+  const filtradas = tarefasCache.filter(t =>
+    (t.titulo || '').toLowerCase().includes(termo) ||
+    (t.descricao || '').toLowerCase().includes(termo) ||
+    (t.nivel || '').toLowerCase().includes(termo)
+  );
   exibirTarefas(filtradas);
 }
 
 function mostrarDetalhesTarefa(id) {
   const tarefa = tarefasCache.find(t => t.id == id);
   if (!tarefa) return;
-  
-  const sidebar = document.getElementById('sidebarConteudo');
-  if (sidebar) {
-    sidebar.innerHTML = `
-      <div style="text-align:center;margin-bottom:15px;">
-        <span style="font-size:3em;">🧪</span>
-      </div>
+  const conteudo = document.getElementById('detalhesConteudo');
+  const titulo = document.getElementById('detalhesTitulo');
+
+  let btnCalendario = '';
+  if (tarefa.prazo) {
+    const data = new Date(tarefa.prazo);
+    const tituloEnc = encodeURIComponent(tarefa.titulo);
+    const inicio = data.toISOString().replace(/-|:|\.\d+/g, '');
+    const fim = new Date(data.getTime() + 30 * 60000).toISOString().replace(/-|:|\.\d+/g, '');
+    btnCalendario = `
+      <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=${tituloEnc}&dates=${inicio}/${fim}&details=${encodeURIComponent(tarefa.descricao || '')}"
+         target="_blank" class="btn btn-sm" style="margin-top:10px;display:inline-block;">📅 Adicionar ao Calendário</a>`;
+  }
+
+  if (conteudo) {
+    conteudo.innerHTML = `
+      <div style="text-align:center;margin-bottom:15px;"><span style="font-size:3em;">🧪</span></div>
       <h4 style="color:var(--dourado);">${escapeHTML(tarefa.titulo)}</h4>
-      <p style="color:var(--texto-secundario);margin:8px 0;">${escapeHTML(tarefa.descricao || '')}</p>
+      <p>${escapeHTML(tarefa.descricao || '')}</p>
       <p style="color:var(--dourado);font-size:1.4em;font-weight:800;">${formatarMoeda(tarefa.valor)}</p>
-      <p style="color:var(--texto-terciario);">🕒 ${tarefa.tempoEstimado || 'N/D'} | Nível: ${tarefa.nivel || 'Todos'}</p>
-      <button class="btn" style="width:100%;margin-top:15px;" onclick="iniciarTarefa('${tarefa.id}')">▶️ Iniciar Tarefa</button>
+      <p>🕒 ${tarefa.tempoEstimado || 'N/D'} | Nível: ${tarefa.nivel || 'Todos'}</p>
+      <button class="btn" onclick="iniciarTarefa('${tarefa.id}')">▶️ Iniciar Tarefa</button>
+      ${btnCalendario}
     `;
   }
-  
-  if (!sidebarAberta) toggleSidebar();
+  if (titulo) titulo.textContent = `Detalhes: ${tarefa.titulo}`;
+  const sidebar = document.getElementById('sidebarDetalhes');
+  if (sidebar && !sidebar.classList.contains('ativo')) {
+    toggleSidebar();
+  }
 }
 
 function iniciarTarefa(id) {
   const tarefa = tarefasCache.find(t => t.id == id);
   if (!tarefa) return;
-  
   const select = document.getElementById('tarefaSelect');
   if (select) select.value = id;
-  
   document.querySelector('.abas button[data-aba="enviar"]')?.click();
   mostrarToast(`Tarefa "${tarefa.titulo}" selecionada!`, 'sucesso');
 }
 
-function atualizarStats(tarefas) {
-  const container = document.getElementById('listaTarefas');
-  if (!container) return;
-  
-  const statsHTML = `
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icone">💰</div>
-        <div class="stat-valor">${formatarMoeda(obterSessao()?.saldo || 0)}</div>
-        <div class="stat-label">Saldo Total</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icone">📋</div>
-        <div class="stat-valor">${tarefas.length}</div>
-        <div class="stat-label">Tarefas Disponíveis</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icone">✅</div>
-        <div class="stat-valor">0</div>
-        <div class="stat-label">Concluídas Hoje</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icone">🏆</div>
-        <div class="stat-valor">Bronze</div>
-        <div class="stat-label">Seu Nível</div>
-      </div>
-    </div>
-  `;
-  
-  const existente = container.querySelector('.stats-grid');
-  if (!existente) {
-    container.insertAdjacentHTML('afterbegin', statsHTML);
-  }
+// ========== ENVIO DE COMPROVATIVO ==========
+async function carregarTarefasSelect(userId) {
+  const select = document.getElementById('tarefaSelect');
+  if (!select) return;
+  const res = await api.listarTarefas(userId);
+  if (res.erro || !res.tarefas) return;
+  select.innerHTML = '<option value="">Selecione uma tarefa...</option>' +
+    res.tarefas.map(t => `<option value="${t.id}">${escapeHTML(t.titulo)} - ${formatarMoeda(t.valor)}</option>`).join('');
 }
 
-// ====== ENVIO ======
 async function submeterComprovativo(userId) {
   const tarefaId = document.getElementById('tarefaSelect').value;
   const link = document.getElementById('linkComprovativo').value.trim();
   const observacao = document.getElementById('obsEnvio').value.trim();
-  const msgStatus = document.getElementById('statusEnvio');
+  const statusDiv = document.getElementById('statusEnvio');
+  const fileInput = document.getElementById('arquivoComprovativo');
+  const arquivo = fileInput?.files[0];
 
-  if (!tarefaId || !link) {
-    msgStatus.innerHTML = '<p class="erro">⚠️ Selecione a tarefa e insira o link.</p>';
-    mostrarToast('Preencha todos os campos obrigatórios.', 'aviso');
+  if (!tarefaId) {
+    statusDiv.innerHTML = '<p class="erro">Selecione uma tarefa.</p>';
     return;
   }
-
-  if (!validarURL(link)) {
-    msgStatus.innerHTML = '<p class="erro">🔗 Link inválido. Insira uma URL completa.</p>';
+  if (!link && !arquivo) {
+    statusDiv.innerHTML = '<p class="erro">Forneça um link ou imagem.</p>';
+    return;
+  }
+  if (link && !validarURL(link)) {
+    statusDiv.innerHTML = '<p class="erro">Link inválido.</p>';
     return;
   }
 
   const btn = document.querySelector('#formEnvio .btn');
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = '⏳ Enviando...';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
+
+  let dados = { userId, tarefaId, link, observacao };
+  if (arquivo) {
+    if (arquivo.size > 5 * 1024 * 1024) {
+      statusDiv.innerHTML = '<p class="erro">Arquivo máximo 5MB.</p>';
+      if (btn) { btn.disabled = false; btn.textContent = '📨 Submeter'; }
+      return;
+    }
+    const reader = new FileReader();
+    const base64 = await new Promise(resolve => { reader.onload = e => resolve(e.target.result); reader.readAsDataURL(arquivo); });
+    dados.imagem = base64;
   }
 
-  const resposta = await api.submeter({ userId, tarefaId, link, observacao });
-  
-  if (btn) {
-    btn.disabled = false;
-    btn.textContent = '📨 Submeter';
-  }
+  const resposta = await api.submeter(dados);
+  if (btn) { btn.disabled = false; btn.textContent = '📨 Submeter'; }
 
   if (resposta.erro) {
-    msgStatus.innerHTML = `<p class="erro">${resposta.erro}</p>`;
-    mostrarToast(resposta.erro, 'erro');
+    statusDiv.innerHTML = `<p class="erro">${resposta.erro}</p>`;
   } else {
-    msgStatus.innerHTML = `<p class="sucesso">✅ ${resposta.mensagem || 'Enviado com sucesso!'}</p>`;
+    statusDiv.innerHTML = '<p class="sucesso">✅ Enviado com sucesso!</p>';
     document.getElementById('formEnvio').reset();
-    mostrarToast('Comprovativo submetido! Aguarde aprovação.', 'sucesso');
+    mostrarToast('Comprovativo submetido!', 'sucesso');
     dispararConfetti();
-    adicionarNotificacao('Submissão enviada', 'Seu comprovativo foi enviado e está pendente de aprovação.');
   }
 }
 
-// ====== EQUIPA ======
-async function carregarEquipa(userId) {
-  const container = document.getElementById('equipaPainel');
+// ========== PARTICIPANTES ==========
+async function carregarParticipantes(userId) {
+  const container = document.getElementById('participantesPainel');
   if (!container) return;
   container.innerHTML = '<div class="skeleton" style="height:100px;"></div>';
-
-  const bandeiras = ['🇦🇴', '🇧🇷', '🇵🇹', '🇲🇿', '🇨🇻'];
-  const nomesBots = ['Bot Alpha', 'Bot Beta', 'Bot Gamma', 'Bot Delta', 'Bot Epsilon'];
-  const statusLista = ['Online', 'Ocupado', 'Online', 'Ausente', 'Online'];
-
+  const res = await api.listarParticipantes(userId);
+  if (res.erro) {
+    container.innerHTML = `<p class="erro">${res.erro}</p>`;
+    return;
+  }
+  participantesCache = res.participantes || [];
+  if (participantesCache.length === 0) {
+    container.innerHTML = '<p>Nenhum participante no momento.</p>';
+    return;
+  }
+  participantesCache.forEach(p => { if (!p.emoji) p.emoji = gerarEmojiAleatorio(); });
   container.innerHTML = `
-    <div class="progresso" style="margin-bottom:20px;">
-      <div style="width: ${Math.floor(Math.random() * 30 + 60)}%;"></div>
-    </div>
-    <p>Progresso da equipa: <span class="texto-dourado">${Math.floor(Math.random() * 30 + 60)}%</span></p>
-    <div class="equipa-lista">
-      ${bandeiras.map((bandeira, i) => `
-        <div class="membro-equipa">
-          <span class="bandeira">${bandeira}</span>
-          <p class="nome">${nomesBots[i]}</p>
-          <p class="status-equipa">🟢 ${statusLista[i]}</p>
+    <p>👥 ${participantesCache.length} participantes</p>
+    <div class="lista-participantes">
+      ${participantesCache.map(p => `
+        <div class="card-participante" onclick="abrirChatComParticipante('${p.id}')">
+          <div class="avatar-emoji">${p.emoji}</div>
+          <div class="nome-participante">${escapeHTML(p.nome || 'Anônimo')}</div>
+          <div class="status-participante">${p.online ? '🟢 Online' : '⚪ Offline'}</div>
         </div>
       `).join('')}
     </div>
   `;
 }
 
-// ====== SALDO E SAQUE ======
-async function carregarSaldo(userId) {
-  const container = document.getElementById('resgatePainel');
+function abrirChatComParticipante(id) {
+  const janela = document.getElementById('chatJanela');
+  const btn = document.getElementById('btnChatFloat');
+  if (!janela || !btn) return;
+  if (!janela.classList.contains('ativo')) {
+    btn.click();
+  }
+  mostrarToast(`Chat com participante #${id} aberto.`, 'info');
+}
+
+// ========== TAREFAS ESPECIAIS ==========
+function configurarTarefasEspeciais(userId) {
+  const form = document.getElementById('formEspecial');
+  const btnCriar = document.getElementById('btnNovaEspecial');
+  const container = document.getElementById('formEspecialContainer');
+
+  btnCriar?.addEventListener('click', () => {
+    container?.classList.toggle('oculto');
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('especialNome').value.trim();
+    const descricao = document.getElementById('especialDescricao').value.trim();
+    const link = document.getElementById('especialLink').value.trim();
+    if (!nome) {
+      mostrarToast('Nome é obrigatório.', 'aviso');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('userId', userId);
+    formData.append('nome', nome);
+    formData.append('descricao', descricao);
+    formData.append('link', link);
+    const imagens = document.getElementById('especialImagens').files;
+    for (let img of imagens) formData.append('imagens', img);
+    const audio = document.getElementById('especialAudio').files[0];
+    if (audio) formData.append('audio', audio);
+    const video = document.getElementById('especialVideo').files[0];
+    if (video) formData.append('video', video);
+
+    const res = await api.criarTarefaEspecial(formData);
+    if (res.erro) {
+      mostrarToast(res.erro, 'erro');
+    } else {
+      mostrarToast('Tarefa especial enviada!', 'sucesso');
+      form.reset();
+      container?.classList.add('oculto');
+      carregarMinhasTarefasEspeciais(userId);
+    }
+  });
+
+  carregarMinhasTarefasEspeciais(userId);
+}
+
+async function carregarMinhasTarefasEspeciais(userId) {
+  const container = document.getElementById('listaEspeciais');
   if (!container) return;
-  container.innerHTML = '<div class="skeleton" style="height:80px;"></div>';
-  
-  const resposta = await api.verSaldo(userId);
-  if (resposta.erro) {
-    container.innerHTML = `<p class="erro">${resposta.erro}</p>`;
-    return;
-  }
-  
-  container.innerHTML = `
-    <div class="saldo-atual">${formatarMoeda(resposta.saldo)}</div>
-    <p style="color:var(--texto-secundario);">Saldo disponível para saque</p>
-    <div class="resgate-opcoes">
-      <button class="btn" onclick="pedirSaquePrompt(${userId}, 500)">💵 500 Kz</button>
-      <button class="btn" onclick="pedirSaquePrompt(${userId}, 1000)">💵 1.000 Kz</button>
-      <button class="btn" onclick="pedirSaquePrompt(${userId}, 0)">💵 Personalizado</button>
-    </div>
-    <p id="msgSaque" class="erro"></p>
-  `;
-}
-
-function pedirSaquePrompt(userId, valorPredefinido) {
-  let valor;
-  if (valorPredefinido > 0) {
-    valor = valorPredefinido;
-  } else {
-    valor = prompt('Quanto deseja sacar? (mínimo 500 Kz)');
-    if (!valor) return;
-  }
-  pedirSaque(userId, Number(valor));
-}
-
-async function pedirSaque(userId, valor) {
-  if (isNaN(valor) || valor < 500) {
-    mostrarToast('Valor mínimo de saque: 500 Kz.', 'aviso');
-    return;
-  }
-  
-  const resposta = await api.pedirSaque(userId, valor);
-  if (resposta.erro) {
-    document.getElementById('msgSaque').textContent = resposta.erro;
-    mostrarToast(resposta.erro, 'erro');
-  } else {
-    mostrarToast('Pedido de saque enviado! Aguarde confirmação.', 'sucesso');
-    carregarSaldo(userId);
-    adicionarNotificacao('Saque Solicitado', `Pedido de ${formatarMoeda(valor)} registado.`);
-  }
-}
-
-// ====== INFORMAÇÕES ======
-async function carregarInfo() {
-  const container = document.getElementById('infoPainel');
-  if (!container) return;
-  container.innerHTML = '<div class="skeleton" style="height:120px;"></div>';
-
-  const res = await api.listarPaginas();
+  const res = await api.listarTarefasEspeciais(userId);
   if (res.erro) {
     container.innerHTML = `<p class="erro">${res.erro}</p>`;
     return;
   }
-  
-  const paginaInfo = res.paginas.find(p => (p.titulo || '').toLowerCase() === 'info_geral');
-  if (!paginaInfo) {
-    container.innerHTML = `
-      <div class="info-texto">
-        <h3>📜 Regras</h3>
-        <ul><li>Complete tarefas para ganhar pontos.</li><li>Cada tarefa aprovada adiciona saldo.</li></ul>
-        <h3>🎓 Tutorial</h3>
-        <ol>
-          <li>Escolha uma tarefa na aba Tarefas</li>
-          <li>Siga as instruções e submeta o comprovativo</li>
-          <li>Aguarde aprovação do gestor</li>
-          <li>Acumule saldo e peça saque</li>
-        </ol>
-        <p style="margin-top:15px;font-style:italic;color:var(--texto-terciario);">O gestor ainda não personalizou esta página.</p>
-      </div>
-    `;
+  if (!res.tarefas || res.tarefas.length === 0) {
+    container.innerHTML = '<p>Nenhuma tarefa especial enviada.</p>';
     return;
   }
-  container.innerHTML = `<div class="info-texto">${paginaInfo.conteudo}</div>`;
+  container.innerHTML = res.tarefas.map(t => `
+    <div class="card-tarefa">
+      <strong>${escapeHTML(t.nome)}</strong>
+      <p>${escapeHTML(t.descricao || '')}</p>
+      <small>${t.aprovado ? '✅ Aprovado' : '⏳ Pendente'}</small>
+    </div>
+  `).join('');
 }
 
-// ====== NOTIFICAÇÕES ======
+// ========== DICAS (SUB-ABAS) ==========
+function configurarDicas(userId) {
+  const botoesSub = document.querySelectorAll('#subAbasDicas button[data-subaba]');
+  const paineisSub = {
+    aplicativos: document.getElementById('subAplicativos'),
+    regras: document.getElementById('subRegras'),
+    ajuda: document.getElementById('subAjuda'),
+    reclamacoes: document.getElementById('subReclamacoes')
+  };
+
+  botoesSub.forEach(btn => {
+    btn.addEventListener('click', () => {
+      botoesSub.forEach(b => b.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      Object.values(paineisSub).forEach(p => p?.classList.add('oculto'));
+      const aba = btn.dataset.subaba;
+      paineisSub[aba]?.classList.remove('oculto');
+      switch(aba) {
+        case 'aplicativos': carregarAplicativos(userId); break;
+        case 'regras': carregarConteudoDica('regras', document.getElementById('conteudoRegras')); break;
+        case 'ajuda': carregarConteudoDica('ajuda', document.getElementById('conteudoAjuda')); break;
+        case 'reclamacoes': configurarReclamacoes(userId); break;
+      }
+    });
+  });
+
+  document.getElementById('formAplicativo')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('appNome').value.trim();
+    const descricao = document.getElementById('appDescricao').value.trim();
+    const arquivo = document.getElementById('appArquivo').files[0];
+    if (!nome || !arquivo) {
+      mostrarToast('Preencha o nome e selecione um ficheiro.', 'aviso');
+      return;
+    }
+    if (arquivo.size > 20 * 1024 * 1024) {
+      mostrarToast('Ficheiro máximo 20MB.', 'erro');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result;
+      const res = await api.enviarAplicativo({ userId, nome, descricao, arquivo: base64, nomeArquivo: arquivo.name });
+      if (res.erro) mostrarToast(res.erro, 'erro');
+      else {
+        mostrarToast('Aplicativo enviado para moderação!', 'sucesso');
+        document.getElementById('formAplicativo').reset();
+        carregarAplicativos(userId);
+      }
+    };
+    reader.readAsDataURL(arquivo);
+  });
+
+  botoesSub[0]?.click();
+}
+
+async function carregarAplicativos(userId) {
+  const container = document.getElementById('listaAplicativos');
+  if (!container) return;
+  const res = await api.listarAplicativos(userId);
+  if (res.erro) {
+    container.innerHTML = `<p class="erro">${res.erro}</p>`;
+    return;
+  }
+  container.innerHTML = res.aplicativos?.length ? res.aplicativos.map(a => `
+    <div style="padding:8px;border-bottom:1px solid var(--borda-vidro);">
+      <strong>${escapeHTML(a.nome)}</strong>
+      <a href="${escapeHTML(a.url)}" target="_blank" style="color:var(--dourado);">⬇️ Download</a>
+      <small style="display:block;">${escapeHTML(a.descricao || '')}</small>
+    </div>
+  `).join('') : '<p>Nenhum aplicativo disponível.</p>';
+}
+
+async function carregarConteudoDica(tipo, container) {
+  if (!container) return;
+  container.innerHTML = '<p>Carregando...</p>';
+  const res = await api.getConteudo(tipo);
+  container.innerHTML = res.conteudo || 'Nenhum conteúdo definido.';
+}
+
+// ========== RECLAMAÇÕES ==========
+function configurarReclamacoes(userId) {
+  const form = document.getElementById('formReclamacao');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const texto = document.getElementById('reclamacaoTexto').value.trim();
+    const arquivo = document.getElementById('reclamacaoArquivo').files[0];
+    if (!texto) {
+      mostrarToast('Descreva sua reclamação.', 'aviso');
+      return;
+    }
+    let arquivoBase64 = null;
+    if (arquivo) {
+      if (arquivo.size > 20 * 1024 * 1024) {
+        mostrarToast('Ficheiro máximo 20MB.', 'erro');
+        return;
+      }
+      const reader = new FileReader();
+      arquivoBase64 = await new Promise(resolve => { reader.onload = e => resolve(e.target.result); reader.readAsDataURL(arquivo); });
+    }
+    const res = await api.enviarReclamacao({ userId, texto, arquivo: arquivoBase64, nomeArquivo: arquivo?.name });
+    if (res.erro) mostrarToast(res.erro, 'erro');
+    else {
+      mostrarToast('Reclamação enviada.', 'sucesso');
+      form.reset();
+    }
+  });
+}
+
+// ========== SALDO E SAQUE ==========
+async function carregarSaldo(userId) {
+  const res = await api.verSaldo(userId);
+  if (res.erro) {
+    document.getElementById('saldoResgate').textContent = 'Erro';
+    return;
+  }
+  document.getElementById('saldoResgate').textContent = formatarMoeda(res.saldo);
+  document.getElementById('saldoAtual').textContent = formatarMoeda(res.saldo);
+
+  document.getElementById('btnSolicitarSaque').onclick = async () => {
+    const valor = Number(document.getElementById('valorSaque').value);
+    const metodo = document.getElementById('metodoSaque').value;
+    if (valor < 500 || !metodo) {
+      mostrarToast('Valor mínimo 500 Kz e selecione um método.', 'aviso');
+      return;
+    }
+    const dados = { userId, valor, metodo };
+    const resposta = await api.pedirSaque(dados);
+    if (resposta.erro) {
+      mostrarToast(resposta.erro, 'erro');
+    } else {
+      mostrarToast('Pedido de saque enviado!', 'sucesso');
+      carregarSaldo(userId);
+    }
+  };
+}
+
+// ========== ANÚNCIOS ROLANTES ==========
+async function carregarAnuncios() {
+  const container = document.getElementById('anunciosRolantes');
+  if (!container) return;
+  const res = await api.listarAnuncios();
+  if (res.erro || !res.anuncios || res.anuncios.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = res.anuncios.map(a => `
+    <button class="anuncio-btn" onclick="window.open('${escapeHTML(a.link)}', '${a.link.startsWith('/') ? '_self' : '_blank'}')">
+      ${a.imagem ? `<img src="${escapeHTML(a.imagem)}" alt="">` : ''}
+      <span>${escapeHTML(a.texto)}</span>
+    </button>
+  `).join('');
+}
+
+// ========== NOTIFICAÇÕES ==========
 function carregarNotificacoes() {
   const salvas = localStorage.getItem('ng_notificacoes');
   notificacoes = salvas ? JSON.parse(salvas) : [];
@@ -402,14 +738,7 @@ function carregarNotificacoes() {
 }
 
 function adicionarNotificacao(titulo, mensagem) {
-  notificacoes.unshift({
-    id: gerarId('notif'),
-    titulo,
-    mensagem,
-    data: new Date().toISOString(),
-    lida: false
-  });
-  
+  notificacoes.unshift({ id: gerarId('notif'), titulo, mensagem, data: new Date().toISOString(), lida: false });
   if (notificacoes.length > 50) notificacoes.pop();
   localStorage.setItem('ng_notificacoes', JSON.stringify(notificacoes));
   atualizarBadge();
@@ -426,66 +755,35 @@ function atualizarBadge() {
 function abrirNotificacoes() {
   const naoLidas = notificacoes.filter(n => !n.lida);
   if (naoLidas.length === 0) {
-    mostrarToast('Nenhuma notificação nova.', 'sucesso');
+    mostrarToast('Nenhuma notificação.', 'info');
     return;
   }
-  
-  const lista = naoLidas.map(n => `• ${n.titulo}: ${n.mensagem}`).join('\n');
-  alert(`🔔 Notificações (${naoLidas.length}):\n\n${lista}`);
-  
+  alert(`🔔 Notificações:\n\n${naoLidas.map(n => n.titulo).join('\n')}`);
   notificacoes.forEach(n => n.lida = true);
   localStorage.setItem('ng_notificacoes', JSON.stringify(notificacoes));
   atualizarBadge();
 }
 
-// ====== TOAST ======
-function mostrarToast(mensagem, tipo = 'sucesso') {
-  const container = document.querySelector('.toast-container') || criarToastContainer();
-  const toast = document.createElement('div');
-  toast.className = `toast ${tipo}`;
-  
-  const icones = { sucesso: '✅', erro: '❌', aviso: '⚠️' };
-  toast.textContent = `${icones[tipo] || 'ℹ️'} ${mensagem}`;
-  container.appendChild(toast);
-  
-  setTimeout(() => toast.remove(), 3000);
-}
-
-function criarToastContainer() {
-  const container = document.createElement('div');
-  container.className = 'toast-container';
-  document.body.appendChild(container);
-  return container;
-}
-
-// ====== CONFETTI ======
+// ========== CONFETTI ==========
 function dispararConfetti() {
   const container = document.createElement('div');
   container.className = 'confetti-container';
   document.body.appendChild(container);
-  
-  const cores = ['#FFD700', '#FFED4A', '#B8860B', '#4CAF50', '#FF4444', '#42A5F5', '#FF9800', '#E91E63'];
-  
+  const cores = ['#FFD700', '#FFED4A', '#B8860B', '#4CAF50', '#FF4444', '#42A5F5'];
   for (let i = 0; i < 60; i++) {
     const piece = document.createElement('div');
     piece.className = 'confetti-piece';
     piece.style.left = Math.random() * 100 + '%';
-    piece.style.top = -(Math.random() * 20 + 10) + 'px';
     piece.style.backgroundColor = cores[Math.floor(Math.random() * cores.length)];
     piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
-    piece.style.animationDelay = Math.random() * 0.5 + 's';
-    piece.style.width = (Math.random() * 10 + 8) + 'px';
-    piece.style.height = (Math.random() * 10 + 8) + 'px';
-    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
     container.appendChild(piece);
   }
-  
   setTimeout(() => container.remove(), 3500);
 }
 
-// ====== EXPORTAR PARA USO GLOBAL ======
+// ========== EXPORTAÇÕES GLOBAIS ==========
+window.toggleSidebar = toggleSidebar;
 window.iniciarTarefa = iniciarTarefa;
 window.mostrarDetalhesTarefa = mostrarDetalhesTarefa;
-window.pedirSaquePrompt = pedirSaquePrompt;
-window.toggleSidebar = toggleSidebar;
 window.abrirNotificacoes = abrirNotificacoes;
+window.abrirChatComParticipante = abrirChatComParticipante;

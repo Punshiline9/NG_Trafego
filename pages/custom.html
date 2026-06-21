@@ -3,149 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Página - NG</title>
+  <title id="paginaTitulo">NG - Informações</title>
   <link rel="stylesheet" href="../css/comum.css">
   <link rel="manifest" href="../manifest.json">
   <style>
-    .pagina-dinamica {
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+    }
+    .custom-container {
       max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
+      width: 100%;
       animation: fadeIn 0.5s ease;
     }
-    .pagina-dinamica h1 {
+    .custom-container h1 {
       color: var(--dourado);
       margin-bottom: 20px;
+      text-align: center;
       font-size: 1.8em;
-      text-shadow: 0 0 15px rgba(255,215,0,0.3);
     }
-    .pagina-dinamica .conteudo {
+    .custom-container .conteudo {
       color: var(--texto-secundario);
       line-height: 1.8;
       font-size: 1em;
     }
-    .pagina-dinamica .conteudo h2 {
+    .custom-container .conteudo h2,
+    .custom-container .conteudo h3 {
       color: var(--dourado);
-      margin: 20px 0 10px;
+      margin-top: 25px;
+      margin-bottom: 10px;
     }
-    .pagina-dinamica .conteudo h3 {
-      color: var(--dourado);
-      margin: 15px 0 8px;
-    }
-    .pagina-dinamica .conteudo ul, 
-    .pagina-dinamica .conteudo ol {
-      margin-left: 20px;
-      margin-bottom: 15px;
-    }
-    .pagina-dinamica .conteudo li {
-      margin-bottom: 6px;
-    }
-    .pagina-dinamica .conteudo a {
-      color: var(--dourado);
-      text-decoration: underline;
-    }
-    .pagina-dinamica .conteudo p {
+    .custom-container .conteudo p {
       margin-bottom: 12px;
     }
-    .lista-paginas-publica {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      animation: fadeIn 0.5s ease;
+    .custom-container .conteudo ul {
+      margin-left: 20px;
+      margin-bottom: 12px;
     }
-    .lista-paginas-publica h2 {
+    .custom-container .conteudo a {
       color: var(--dourado);
-      margin-bottom: 20px;
-    }
-    .lista-paginas-publica a {
-      color: var(--dourado);
-      text-decoration: none;
-      display: block;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--borda-vidro);
-      transition: all 0.3s;
-      border-radius: 8px;
-      font-weight: 500;
-    }
-    .lista-paginas-publica a:hover {
-      background: rgba(255,215,0,0.08);
-      padding-left: 20px;
-      text-shadow: 0 0 10px rgba(255,215,0,0.3);
     }
     .btn-voltar {
-      display: inline-block;
-      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 24px;
+      background: transparent;
+      border: 2px solid var(--borda-vidro);
       color: var(--dourado);
-      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 25px;
+      cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s;
+      transition: all 0.3s;
+      text-decoration: none;
     }
     .btn-voltar:hover {
-      text-shadow: 0 0 10px rgba(255,215,0,0.5);
+      border-color: var(--dourado);
+      background: rgba(255,215,0,0.08);
+    }
+    .erro-conteudo {
+      text-align: center;
+      color: var(--erro);
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
-  <div id="conteiner" class="glass" style="max-width: 800px; margin: 40px auto;"></div>
-
-  <div class="creditos">
-    <span class="selo-verificado">✔️ Verificado</span>
-    © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+  <div class="custom-container glass">
+    <h1 id="conteudoTitulo">Carregando...</h1>
+    <div id="conteudoCorpo" class="conteudo">
+      <p>A carregar conteúdo...</p>
+    </div>
+    <button class="btn-voltar" onclick="history.back()">← Voltar</button>
   </div>
 
-  <script src="../js/api.js"></script>
   <script src="../js/utils.js"></script>
+  <script src="../js/api.js"></script>
   <script>
-    document.getElementById('ano').textContent = new Date().getFullYear();
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('../sw.js');
-    }
-
-    async function carregar() {
+    (async () => {
       const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      const container = document.getElementById('conteiner');
+      const id = params.get('id') || 'termos';
 
-      if (id) {
-        const res = await api.listarPaginas();
-        if (res.erro) {
-          container.innerHTML = `<p class="erro" style="text-align:center;padding:20px;">${res.erro}</p>`;
+      const tituloEl = document.getElementById('conteudoTitulo');
+      const corpoEl = document.getElementById('conteudoCorpo');
+      const paginaTitulo = document.getElementById('paginaTitulo');
+
+      // Mapear títulos amigáveis
+      const titulos = {
+        'termos': '📄 Termos de Uso',
+        'privacidade': '🔒 Política de Privacidade',
+        'regras': '📜 Regras Gerais'
+      };
+
+      const tituloAmigavel = titulos[id] || '📄 Informações';
+      tituloEl.textContent = tituloAmigavel;
+      paginaTitulo.textContent = `NG - ${tituloAmigavel.replace(/[📄🔒📜]/g, '').trim()}`;
+
+      try {
+        // Tenta primeiro como conteúdo de dica (regras, ajuda)
+        const res = await api.getConteudo(id);
+        if (res && !res.erro && res.conteudo) {
+          corpoEl.innerHTML = res.conteudo;
           return;
         }
-        const pagina = res.paginas.find(p => p.id == id);
-        if (!pagina) {
-          container.innerHTML = '<p style="text-align:center;padding:20px;color:var(--texto-terciario);">Página não encontrada.</p>';
-          return;
+        // Se não houver conteúdo específico, tenta como página dinâmica
+        const paginas = await api.listarPaginas();
+        if (paginas && !paginas.erro && paginas.paginas) {
+          const pagina = paginas.paginas.find(p => p.slug === id);
+          if (pagina) {
+            corpoEl.innerHTML = pagina.conteudo || '<p>Conteúdo em branco.</p>';
+            return;
+          }
         }
-        container.innerHTML = `
-          <div class="pagina-dinamica">
-            <h1>${escapeHTML(pagina.titulo)}</h1>
-            <div class="conteudo">${pagina.conteudo || '<p>Sem conteúdo.</p>'}</div>
-            <a href="custom.html" class="btn-voltar">← Voltar para páginas</a>
-          </div>
-        `;
-        document.title = escapeHTML(pagina.titulo) + ' - NG';
-      } else {
-        const res = await api.listarPaginas();
-        if (res.erro) {
-          container.innerHTML = `<p class="erro" style="text-align:center;padding:20px;">${res.erro}</p>`;
-          return;
-        }
-        if (!res.paginas || !res.paginas.length) {
-          container.innerHTML = '<p style="text-align:center;padding:20px;color:var(--texto-terciario);">📭 Nenhuma página disponível.</p>';
-          return;
-        }
-        let html = '<div class="lista-paginas-publica"><h2>📄 Páginas</h2>';
-        res.paginas.forEach(p => {
-          html += `<a href="custom.html?id=${p.id}">📄 ${escapeHTML(p.titulo)}</a>`;
-        });
-        html += '</div>';
-        container.innerHTML = html;
+        // Fallback para conteúdo estático
+        corpoEl.innerHTML = '<p>Conteúdo não disponível no momento. Por favor, entre em contacto com o suporte.</p>';
+      } catch (err) {
+        corpoEl.innerHTML = '<p class="erro-conteudo">Erro ao carregar conteúdo. Verifique sua ligação à internet.</p>';
       }
-    }
-
-    carregar();
+    })();
   </script>
 </body>
 </html>

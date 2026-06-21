@@ -1,22 +1,35 @@
 {
   "name": "NG Tarefas",
-  "short_name": "NG",
-  "description": "Sistema de tarefas e recompensas - Complete tarefas, acumule pontos e ganhe dinheiro real!",
-  "start_url": "/NG_Trafego/index.html",
+  "short_name": "NG Tarefas",
+  "description": "Complete tarefas, acumule pontos e ganhe dinheiro real.",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#FFD700",
   "orientation": "portrait-primary",
-  "lang": "pt",
   "icons": [
     {
-      "src": "/NG_Trafego/assets/imagens/logo.png",
+      "src": "./assets/imagens/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/imagens/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "./assets/imagens/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
   "categories": ["productivity", "finance"],
-  "prefer_related_applications": false
+  "lang": "pt",
+  "dir": "ltr"
 }

@@ -7,6 +7,7 @@
   gap: 0;
   overflow: hidden;
   animation: fadeIn 0.6s ease;
+  border-radius: 20px;
 }
 
 .login-container img {
@@ -34,6 +35,9 @@
   background: var(--vidro);
   backdrop-filter: blur(20px);
   border-right: 1px solid var(--borda-vidro);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* ====== PAINEL DIREITO (PREVIEW / INFO) ====== */
@@ -69,6 +73,8 @@
 .login-painel-direito .recursos-lista {
   margin-top: 20px;
   text-align: left;
+  width: 100%;
+  max-width: 250px;
 }
 
 .login-painel-direito .recurso-item {
@@ -87,10 +93,11 @@
 
 /* ====== CONTACTOS NO PAINEL DIREITO ====== */
 .contactos-info {
-  margin-top: 20px;
-  padding-top: 15px;
+  margin-top: 24px;
+  padding-top: 18px;
   border-top: 1px solid var(--borda-vidro);
   text-align: center;
+  width: 100%;
 }
 
 .contactos-info p {
@@ -104,11 +111,15 @@
   text-decoration: none;
   font-weight: 600;
   transition: all 0.2s;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
 }
 
 .contactos-info .contacto-link:hover {
   text-shadow: 0 0 10px rgba(255,215,0,0.5);
   text-decoration: underline;
+  background: rgba(255,215,0,0.08);
 }
 
 /* ====== TOGGLE LOGIN / CADASTRO ====== */
@@ -128,7 +139,7 @@
   border-radius: 22px;
   color: var(--texto-secundario);
   font-weight: 600;
-  transition: 0.3s;
+  transition: all 0.3s;
   font-size: 0.9em;
 }
 
@@ -141,11 +152,23 @@
 
 .form-toggle span:hover:not(.ativo) {
   color: var(--dourado);
+  background: rgba(255,215,0,0.06);
+}
+
+.form-toggle span:focus-visible {
+  outline: 2px solid var(--dourado);
+  outline-offset: 2px;
 }
 
 /* ====== FORMULÁRIOS ====== */
 .form-box {
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  width: 100%;
+  max-width: 340px;
+}
+
+.form-box.oculto {
+  display: none;
 }
 
 .form-box input {
@@ -159,7 +182,27 @@
   font-size: 1em;
 }
 
-/* ====== GRUPO DE INPUT COM ÍCONE ====== */
+/* Espaçamento entre botões (Login + Biometria) */
+#formLogin .btn + .btn {
+  margin-top: 8px;
+}
+
+/* Botão de biometria */
+#btnBiometria {
+  background: linear-gradient(135deg, #222, #111);
+  color: var(--dourado);
+  border: 1px solid var(--dourado);
+  font-size: 0.9em;
+  padding: 10px 22px;
+}
+
+#btnBiometria:hover {
+  background: linear-gradient(135deg, #333, #1a1a1a);
+  border-color: var(--dourado);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+}
+
+/* ====== GRUPO DE INPUT COM ÍCONE (BUTTON) ====== */
 .input-grupo {
   position: relative;
   margin-bottom: 5px;
@@ -171,17 +214,33 @@
 
 .input-grupo .input-icone {
   position: absolute;
-  right: 14px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
   font-size: 1.2em;
   color: var(--texto-terciario);
-  transition: color 0.2s;
+  transition: color 0.2s, background 0.2s;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
 }
 
 .input-grupo .input-icone:hover {
   color: var(--dourado);
+  background: rgba(255,215,0,0.08);
+}
+
+.input-grupo .input-icone:focus-visible {
+  outline: 2px solid var(--dourado);
+  outline-offset: 2px;
 }
 
 /* ====== FORÇA DA SENHA ====== */
@@ -191,6 +250,11 @@
   margin: -8px 0 12px;
   transition: all 0.3s;
   background: #333;
+  text-align: left;
+  font-size: 0.7em;
+  color: var(--texto-terciario);
+  line-height: 1.2;
+  padding-top: 2px;
 }
 
 .forca-senha.fraca { background: var(--erro); width: 33%; }
@@ -213,6 +277,11 @@
   accent-color: var(--dourado);
   cursor: pointer;
   margin: 0;
+}
+
+.lembrar-checkbox input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--dourado);
+  outline-offset: 2px;
 }
 
 /* ====== LINK ESQUECI SENHA ====== */
@@ -277,6 +346,19 @@
 #msgErro {
   margin-top: 15px;
   text-align: center;
+  min-height: 20px;
+}
+
+/* ====== ESTADO DE LOADING DOS BOTÕES ====== */
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: grayscale(20%);
+}
+
+.btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 /* ====== RESPONSIVIDADE ====== */
@@ -304,11 +386,16 @@
     padding: 8px 18px;
     font-size: 0.85em;
   }
+
+  .form-box {
+    max-width: 100%;
+  }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .login-container {
     margin: 15px 8px;
+    border-radius: 14px;
   }
 
   .login-painel-esquerdo {
@@ -324,5 +411,11 @@
   .form-toggle span {
     border-radius: 20px;
     text-align: center;
+  }
+
+  .input-grupo .input-icone {
+    right: 4px;
+    width: 32px;
+    height: 32px;
   }
 }

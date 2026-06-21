@@ -11,7 +11,13 @@
 <body>
   <div class="podio-container glass">
     <h1>🏆 Pódio Final</h1>
-    <div id="podio" class="podio"></div>
+    <div id="podio" class="podio">
+      <!-- O conteúdo será gerado pelo podio.js -->
+      <div class="podio-vazio">
+        <p style="font-size:3em;">🏆</p>
+        <p>A carregar o pódio...</p>
+      </div>
+    </div>
   </div>
 
   <div class="creditos">
@@ -19,7 +25,9 @@
     © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
   </div>
 
+  <!-- Scripts na ordem correta -->
   <script src="../js/utils.js"></script>
+  <script src="../js/api.js"></script>   <!-- ESSENCIAL para o podio.js -->
   <script src="../js/podio.js"></script>
   <script>
     document.getElementById('ano').textContent = new Date().getFullYear();

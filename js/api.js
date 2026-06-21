@@ -1,20 +1,66 @@
 // =============================================
-// 🌐 NG TRAFEGO - API (GOOGLE APPS SCRIPT)
+// 🌐 NG TAREFAS - API (GOOGLE APPS SCRIPT)
+// Versão reforçada com retry, cache, chat e mais
 // =============================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwnD78AgCIP-fyrzyOTI9gxcTw0cpCouABuA57ffW5-z8ag7zf8n09rnSQ-mp2avVHwow/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbySZwF8v3tFvGhBe9N6OWYwQv_ICS6RdW2p24UZ2PHEbqCvWMfmmM_SoCUKKPaObROaqw/exec';
 const API_TIMEOUT = 15000;
+const MAX_RETENTATIVAS = 2;
 
-async function chamarAPI(acao, dados = {}, tentarNovamente = true) {
+// Cache simples em memória (sessão)
+const cache = new Map();
+const CACHE_TTL = 60000; // 1 minuto
+
+function getCache(chave) {
+  const entry = cache.get(chave);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL) {
+    cache.delete(chave);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCache(chave, data) {
+  cache.set(chave, { data, timestamp: Date.now() });
+}
+
+function invalidateCache() {
+  cache.clear();
+}
+
+// =============================================
+// Chamada principal (com retry melhorado e cache opcional)
+// =============================================
+async function chamarAPI(acao, dados = {}, opcoes = {}) {
+  const {
+    timeout = API_TIMEOUT,
+    tentarNovamente = true,
+    usarCache = false,
+    cacheKey = null
+  } = opcoes;
+
+  // Verificar cache
+  if (usarCache && cacheKey) {
+    const cached = getCache(cacheKey);
+    if (cached) return cached;
+  }
+
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), API_TIMEOUT);
-  
+  const idTimeout = setTimeout(() => controller.abort(), timeout);
+
   try {
-    const formData = new FormData();
-    formData.append('acao', acao);
-    for (let chave in dados) {
-      if (dados[chave] !== undefined && dados[chave] !== null) {
-        formData.append(chave, dados[chave]);
+    let formData;
+    if (dados instanceof FormData) {
+      formData = dados;
+      formData.append('acao', acao);
+    } else {
+      formData = new FormData();
+      formData.append('acao', acao);
+      for (let chave in dados) {
+        if (dados[chave] !== undefined && dados[chave] !== null) {
+          formData.append(chave, dados[chave]);
+        }
       }
     }
 
@@ -24,35 +70,44 @@ async function chamarAPI(acao, dados = {}, tentarNovamente = true) {
       signal: controller.signal
     });
 
-    clearTimeout(timeout);
+    clearTimeout(idTimeout);
 
     if (!resposta.ok) {
-      throw new Error(`Erro HTTP: ${resposta.status}`);
+      throw new Error(`HTTP ${resposta.status}: ${resposta.statusText}`);
     }
 
     const json = await resposta.json();
-    
     if (json === null || json === undefined) {
       throw new Error('Resposta vazia do servidor');
     }
-    
-    return json;
-    
-  } catch (e) {
-    clearTimeout(timeout);
-    console.error(`❌ API [${acao}]:`, e.message);
-    
-    if (tentarNovamente && (e.name === 'AbortError' || e.message.includes('HTTP'))) {
-      console.warn(`🔄 Retentando [${acao}]...`);
-      await new Promise(r => setTimeout(r, 1000));
-      return chamarAPI(acao, dados, false);
+
+    // Guardar em cache se solicitado
+    if (usarCache && cacheKey) {
+      setCache(cacheKey, json);
     }
-    
+
+    return json;
+
+  } catch (e) {
+    clearTimeout(idTimeout);
+    console.error(`❌ API [${acao}]:`, e.message);
+
+    if (tentarNovamente && (e.name === 'AbortError' || e.message.includes('HTTP'))) {
+      const tentativa = opcoes.tentativa || 1;
+      if (tentativa <= MAX_RETENTATIVAS) {
+        console.warn(`🔄 Retentando [${acao}] (${tentativa}/${MAX_RETENTATIVAS})...`);
+        await new Promise(r => setTimeout(r, 1000 * tentativa));
+        return chamarAPI(acao, dados, { ...opcoes, tentativa: tentativa + 1 });
+      }
+    }
+
     return { erro: 'Falha na conexão. Verifique sua internet.' };
   }
 }
 
-// ====== MÉTODOS PÚBLICOS ======
+// =============================================
+// MÉTODOS PÚBLICOS (organizados por domínio)
+// =============================================
 const api = {
   // --- Autenticação ---
   login: (user, senha) => chamarAPI('login', { user, senha }),
@@ -60,27 +115,83 @@ const api = {
   recuperarSenha: (email) => chamarAPI('recuperar', { email }),
 
   // --- Participante ---
-  listarTarefas: (userId) => chamarAPI('listarTarefas', { userId }),
-  submeter: (dados) => chamarAPI('submeter', dados),
+  listarTarefas: (userId) => chamarAPI('listarTarefas', { userId }, { usarCache: true, cacheKey: `tarefas_${userId}` }),
+  submeter: (dados) => {
+    invalidateCache();
+    return chamarAPI('submeter', dados);
+  },
   verSaldo: (userId) => chamarAPI('verSaldo', { userId }),
-  pedirSaque: (userId, valor) => chamarAPI('pedirSaque', { userId, valor }),
+  pedirSaque: (dados) => chamarAPI('pedirSaque', dados),
 
-  // --- Gestor / Admin ---
+  // --- Perfil ---
+  atualizarPerfil: (dados) => chamarAPI('atualizarPerfil', dados),
+  uploadFotoPerfil: (userId, file) => {
+    const fd = new FormData();
+    fd.append('userId', userId);
+    fd.append('foto', file);
+    return chamarAPI('uploadFotoPerfil', fd);
+  },
+
+  // --- Metas (NOVO) ---
+  verMetas: (userId) => chamarAPI('verMetas', { userId }),
+  salvarMetas: (dados) => chamarAPI('salvarMetas', dados), // { userId, diaria, semanal }
+
+  // --- Participantes (lista unificada) ---
+  listarParticipantes: (userId) => chamarAPI('listarParticipantes', { userId }, { usarCache: true, cacheKey: `participantes_${userId}` }),
+
+  // --- Tarefas Especiais ---
+  criarTarefaEspecial: (dados) => chamarAPI('criarTarefaEspecial', dados),
+  listarTarefasEspeciais: (userId, tipo = 'user') => chamarAPI('listarTarefasEspeciais', { userId, tipo }),
+  aprovarTarefaEspecial: (id) => chamarAPI('aprovarTarefaEspecial', { id }),
+  eliminarTarefaEspecial: (id) => chamarAPI('eliminarTarefaEspecial', { id }),
+
+  // --- Anúncios ---
+  listarAnuncios: () => chamarAPI('listarAnuncios', {}, { usarCache: true, cacheKey: 'anuncios' }),
+  criarAnuncio: (dados) => {
+    invalidateCache();
+    return chamarAPI('criarAnuncio', dados);
+  },
+  editarAnuncio: (dados) => {
+    invalidateCache();
+    return chamarAPI('editarAnuncio', dados);
+  },
+  eliminarAnuncio: (id) => {
+    invalidateCache();
+    return chamarAPI('eliminarAnuncio', { id });
+  },
+
+  // --- Aplicativos (Dicas) ---
+  listarAplicativos: (userId, tipo = 'user') => chamarAPI('listarAplicativos', { userId, tipo }),
+  enviarAplicativo: (dados) => chamarAPI('enviarAplicativo', dados),
+  aprovarAplicativo: (id) => chamarAPI('aprovarAplicativo', { id }),
+  eliminarAplicativo: (id) => chamarAPI('eliminarAplicativo', { id }),
+
+  // --- Reclamações ---
+  listarReclamacoes: (userId, tipo = 'user') => chamarAPI('listarReclamacoes', { userId, tipo }),
+  enviarReclamacao: (dados) => chamarAPI('enviarReclamacao', dados),
+  responderReclamacao: (dados) => chamarAPI('responderReclamacao', dados),
+
+  // --- Conteúdo das Dicas (Regras, Ajuda) ---
+  getConteudo: (tipo) => chamarAPI('getConteudo', { tipo }, { usarCache: true, cacheKey: `conteudo_${tipo}` }),
+  salvarConteudo: (dados) => {
+    invalidateCache();
+    return chamarAPI('salvarConteudo', dados);
+  },
+
+  // --- Gestor ---
   listarSubmissoesPendentes: () => chamarAPI('listarSubmissoesPendentes'),
   aprovar: (submissaoId) => chamarAPI('aprovar', { submissaoId }),
   rejeitar: (submissaoId, motivo) => chamarAPI('rejeitar', { submissaoId, motivo }),
   criarTarefa: (dados) => chamarAPI('criarTarefa', dados),
   editarTarefa: (dados) => chamarAPI('editarTarefa', dados),
-  listarUtilizadores: () => chamarAPI('listarUtilizadores'),
+  listarUtilizadores: (tipo = 'todos') => chamarAPI('listarUtilizadores', { tipo }),
   redefinirSenha: (userId, novaSenha, acao) => chamarAPI('redefinirSenha', { userId, nova: novaSenha, acao }),
   configSistema: (dados) => chamarAPI('configSistema', dados),
-  
+
   // --- Bots ---
   gerarBots: () => chamarAPI('gerarBots'),
   gerarBotsPersonalizados: (config) => chamarAPI('gerarBotsPersonalizados', config),
-  
-  // --- Pódio ---
-  gerarPodio: () => chamarAPI('gerarPodio'),
+  eliminarBot: (id) => chamarAPI('eliminarBot', { id }),
 
   // --- Saques (gestor) ---
   listarSaquesPendentes: () => chamarAPI('listarSaquesPendentes'),
@@ -91,6 +202,17 @@ const api = {
   criarPagina: (dados) => chamarAPI('criarPagina', dados),
   editarPagina: (dados) => chamarAPI('editarPagina', dados),
 
-  // --- Busca inteligente ---
+  // --- Chat Interno ---
+  enviarMensagem: (dados) => chamarAPI('enviarMensagem', dados),
+  listarMensagens: (userId) => chamarAPI('listarMensagens', { userId }),
+  marcarLida: (userId, remetenteId) => chamarAPI('marcarLida', { userId, remetenteId }),
+
+  // --- Busca ---
   buscar: (termo) => chamarAPI('buscar', { termo })
 };
+
+// =============================================
+// EXPORTAR PARA USO GLOBAL
+// =============================================
+window.api = api;
+window.invalidateCache = invalidateCache;

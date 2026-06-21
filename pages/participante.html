@@ -3,105 +3,338 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Participante - NG</title>
+  <title>NG - Painel Participante</title>
   <link rel="stylesheet" href="../css/comum.css">
   <link rel="stylesheet" href="../css/participante.css">
   <link rel="manifest" href="../manifest.json">
 </head>
 <body>
-  <div class="painel glass">
-    <h2>👤 Bem-vindo(a), <span id="nomeUser"></span></h2>
+  <!-- ========== CABEÇALHO DO PAINEL ========== -->
+  <header class="painel-cabecalho glass">
+    <div class="saudacao">
+      <h1 id="saudacaoNome">Olá, <span id="nomeParticipante">Participante</span></h1>
+      <span class="id-usuario" id="idUsuario">ID: carregando...</span>
+    </div>
+    <div class="resumo-rapido">
+      <div class="resumo-item">
+        <span class="resumo-icone">💰</span>
+        <span class="resumo-valor" id="saldoAtual">0,00 Kz</span>
+        <span class="resumo-label">Saldo</span>
+      </div>
+      <div class="resumo-item">
+        <span class="resumo-icone">✅</span>
+        <span class="resumo-valor" id="tarefasHoje">0</span>
+        <span class="resumo-label">Hoje</span>
+      </div>
+      <div class="resumo-item">
+        <span class="resumo-icone">⭐</span>
+        <span class="resumo-valor" id="nivelAtual">Bronze</span>
+        <span class="resumo-label">Nível</span>
+      </div>
+      <!-- NOVO: Reputação -->
+      <div class="resumo-item">
+        <span class="resumo-icone">🏅</span>
+        <span class="resumo-valor" id="reputacao">--</span>
+        <span class="resumo-label">Reputação</span>
+      </div>
+    </div>
+    <!-- Barra de progresso do nível -->
+    <div class="barra-nivel-container">
+      <div class="barra-nivel-preenchida" id="barraNivel" style="width: 0%;"></div>
+      <span class="barra-nivel-texto" id="pontosNivel">0 / 100 pontos</span>
+    </div>
+    <!-- Botão Modo Foco -->
+    <button id="btnModoFoco" class="btn-icone" title="Modo Foco (oculta distrações)">🧘</button>
+  </header>
 
-    <!-- Abas de navegação -->
-    <div class="abas">
+  <!-- ========== ANÚNCIOS ROLANTES ========== -->
+  <div id="anunciosRolantes" class="anuncios-rolantes" style="margin-bottom:15px;"></div>
+
+  <!-- ========== CONTEÚDO PRINCIPAL ========== -->
+  <main class="painel-principal glass">
+    <!-- ABAS -->
+    <nav class="abas" id="abasPrincipais">
       <button class="ativo" data-aba="tarefas">📋 Tarefas</button>
       <button data-aba="enviar">📤 Enviar</button>
-      <button data-aba="equipa">👥 Equipa</button>
+      <button data-aba="participantes">👥 Outros Participantes</button>
+      <button data-aba="especiais">⭐ Tarefas Especiais</button>
+      <button data-aba="dicas">📖 Dicas</button>
       <button data-aba="resgate">💰 Resgate</button>
-      <button data-aba="info">ℹ️ Info</button>
-      <button onclick="logout()" style="margin-left:auto;">🚪 Sair</button>
-    </div>
+      <button data-aba="perfil">👤 Perfil</button>
+    </nav>
 
-    <!-- Painel Tarefas -->
-    <div id="tarefas" class="aba-painel">
-      <div class="busca-container">
-        <input type="text" id="buscaTarefas" placeholder="🔍 Buscar tarefas (título ou descrição)...">
+    <!-- ===== ABA TAREFAS ===== -->
+    <section id="tarefas" class="aba-painel">
+      <div class="busca-tarefas">
+        <input type="text" id="buscaTarefas" placeholder="🔍 Buscar tarefas por nome ou descrição...">
       </div>
-      <div id="listaTarefas"></div>
-    </div>
+      <div class="tarefas-layout">
+        <div id="listaTarefas" class="lista-tarefas">
+          <!-- Cards de tarefas gerados dinamicamente -->
+          <div class="skeleton" style="height:60px;"></div>
+          <div class="skeleton" style="height:60px;margin-top:10px;"></div>
+        </div>
+        <!-- Sidebar de detalhes (abre ao clicar no ícone ❗) -->
+        <aside id="sidebarDetalhes" class="sidebar-overlay">
+          <div class="sidebar-conteudo">
+            <h3 id="detalhesTitulo">Detalhes da Tarefa</h3>
+            <div id="detalhesConteudo"></div>
+            <button class="sidebar-fechar" id="fecharSidebar">✕</button>
+          </div>
+        </aside>
+      </div>
+    </section>
 
-    <!-- Painel Enviar -->
-    <div id="enviar" class="aba-painel oculto">
-      <div class="form-envio">
+    <!-- ===== ABA ENVIAR ===== -->
+    <section id="enviar" class="aba-painel oculto">
+      <div class="glass">
+        <h3 style="color:var(--dourado);">📤 Enviar Comprovativo</h3>
         <form id="formEnvio">
-          <label for="tarefaSelect">Selecionar Tarefa</label>
+          <label for="tarefaSelect">Selecione a tarefa</label>
           <select id="tarefaSelect" required>
-            <option value="">-- Escolha a tarefa --</option>
+            <option value="">Carregando tarefas...</option>
           </select>
-          <label for="linkComprovativo">Link do Comprovativo</label>
-          <input type="url" id="linkComprovativo" placeholder="https://..." required>
+          <label for="linkComprovativo">Link do comprovativo (ou faça upload)</label>
+          <input type="url" id="linkComprovativo" placeholder="https://...">
+          <label>Ou carregue uma imagem</label>
+          <div class="upload-area" id="uploadComprovativoArea">
+            <span class="icone-upload">🖼️</span>
+            <p>Clique para selecionar uma imagem (JPG, PNG, etc.)</p>
+            <input type="file" id="arquivoComprovativo" accept="image/*">
+          </div>
           <label for="obsEnvio">Observação (opcional)</label>
-          <textarea id="obsEnvio" rows="2"></textarea>
-          <button type="submit" class="btn">📨 Submeter</button>
+          <textarea id="obsEnvio" rows="3" placeholder="Alguma informação adicional..."></textarea>
+          <button type="submit" class="btn" style="width:100%;">📨 Submeter</button>
         </form>
-        <div id="statusEnvio"></div>
+        <div id="statusEnvio" class="status-envio"></div>
       </div>
-    </div>
+    </section>
 
-    <!-- Painel Equipa -->
-    <div id="equipa" class="aba-painel oculto">
-      <div id="equipaPainel"></div>
-    </div>
+    <!-- ===== ABA PARTICIPANTES ===== -->
+    <section id="participantes" class="aba-painel oculto">
+      <div id="participantesPainel" class="lista-participantes-container">
+        <div class="skeleton" style="height:100px;"></div>
+      </div>
+    </section>
 
-    <!-- Painel Resgate -->
-    <div id="resgate" class="aba-painel oculto">
-      <div id="resgatePainel"></div>
-    </div>
+    <!-- ===== ABA TAREFAS ESPECIAIS ===== -->
+    <section id="especiais" class="aba-painel oculto">
+      <div id="especiaisPainel">
+        <button id="btnNovaEspecial" class="btn" style="margin-bottom:20px;">➕ Criar Tarefa Especial</button>
+        <!-- Formulário de criação (inicialmente oculto) -->
+        <div id="formEspecialContainer" class="glass oculto">
+          <h4>📝 Criar Tarefa Especial</h4>
+          <form id="formEspecial">
+            <input type="text" id="especialNome" placeholder="Nome da tarefa" required>
+            <textarea id="especialDescricao" rows="4" placeholder="Descrição detalhada"></textarea>
+            <input type="url" id="especialLink" placeholder="Link da tarefa (opcional)">
+            <div class="upload-area" id="uploadEspecialImagens">
+              <span class="icone-upload">🖼️</span>
+              <p>Upload de imagens</p>
+              <input type="file" id="especialImagens" accept="image/*" multiple>
+            </div>
+            <label>Áudio explicativo (opcional)</label>
+            <input type="file" id="especialAudio" accept="audio/*">
+            <label>Vídeo explicativo (opcional)</label>
+            <input type="file" id="especialVideo" accept="video/*">
+            <button type="submit" class="btn">✅ Enviar para Aprovação</button>
+          </form>
+        </div>
+        <div id="listaEspeciais"></div>
+      </div>
+    </section>
 
-    <!-- Painel Info -->
-    <div id="info" class="aba-painel oculto">
-      <div id="infoPainel"></div>
-    </div>
+    <!-- ===== ABA DICAS ===== -->
+    <section id="dicas" class="aba-painel oculto">
+      <div id="dicasPainel">
+        <!-- Sub-abas internas -->
+        <div class="abas sub-abas" id="subAbasDicas">
+          <button class="ativo" data-subaba="aplicativos">📱 Aplicativos</button>
+          <button data-subaba="regras">📜 Regras</button>
+          <button data-subaba="ajuda">❓ Ajuda</button>
+          <button data-subaba="reclamacoes">📢 Reclamações</button>
+        </div>
+        <!-- Conteúdo das sub-abas -->
+        <div id="subAplicativos" class="subaba-painel">
+          <!-- Upload de aplicativo -->
+          <div class="upload-app-container glass" style="margin-bottom:20px;">
+            <h4>📤 Enviar Aplicativo/Dica</h4>
+            <form id="formAplicativo">
+              <input type="text" id="appNome" placeholder="Nome do aplicativo" required>
+              <textarea id="appDescricao" rows="3" placeholder="Descrição"></textarea>
+              <div class="upload-area" id="uploadAppFile">
+                <span class="icone-upload">📁</span>
+                <p>Selecionar ficheiro (APK, PDF, ZIP, etc.)</p>
+                <input type="file" id="appArquivo" accept=".apk,.pdf,.zip,.rar,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+              </div>
+              <button type="submit" class="btn">Enviar (moderação pendente)</button>
+            </form>
+          </div>
+          <!-- Lista de aplicativos aprovados -->
+          <div id="listaAplicativos"></div>
+        </div>
+        <div id="subRegras" class="subaba-painel oculto">
+          <div id="conteudoRegras" class="conteudo-dica"></div>
+        </div>
+        <div id="subAjuda" class="subaba-painel oculto">
+          <div id="conteudoAjuda" class="conteudo-dica"></div>
+        </div>
+        <div id="subReclamacoes" class="subaba-painel oculto">
+          <form id="formReclamacao">
+            <textarea id="reclamacaoTexto" rows="4" placeholder="Descreva o problema..."></textarea>
+            <div class="upload-area" id="uploadReclamacaoFile">
+              <span class="icone-upload">📎</span>
+              <p>Anexar ficheiro (opcional)</p>
+              <input type="file" id="reclamacaoArquivo" accept="*">
+            </div>
+            <button type="submit" class="btn">Enviar Reclamação</button>
+          </form>
+        </div>
+      </div>
+    </section>
 
-    <!-- Rodapé interno do painel -->
-    <div class="painel-rodape">
-      <span class="selo-verificado">✔️ Verificado</span>
-      © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+    <!-- ===== ABA RESGATE ===== -->
+    <section id="resgate" class="aba-painel oculto">
+      <div id="resgatePainel" class="glass">
+        <h3>💸 Solicitar Saque</h3>
+        <p>Saldo disponível: <strong id="saldoResgate">0,00 Kz</strong></p>
+        <p style="color:var(--aviso);">Valor mínimo de saque: <strong>500 Kz</strong></p>
+        <label for="valorSaque">Valor (Kz)</label>
+        <input type="number" id="valorSaque" min="500" step="100" placeholder="Mínimo 500 Kz">
+        <label for="metodoSaque">Método de pagamento</label>
+        <select id="metodoSaque">
+          <option value="">Selecione...</option>
+          <option value="multicaixa">Multicaixa Express</option>
+          <option value="ekwanza">E-Kwanza</option>
+          <option value="unitel">Unitel Money</option>
+          <option value="bancaria">Transferência Bancária</option>
+        </select>
+        <!-- Campos condicionais (ex: número de telefone, IBAN) -->
+        <div id="camposExtrasSaque"></div>
+        <button id="btnSolicitarSaque" class="btn" style="width:100%;">🔔 Solicitar Saque</button>
+        <div id="statusSaque"></div>
+      </div>
+    </section>
+
+    <!-- ===== ABA PERFIL ===== -->
+    <section id="perfil" class="aba-painel oculto">
+      <div id="perfilPainel" class="glass">
+        <h3>⚙️ Configurações do Perfil</h3>
+        <!-- Foto de perfil -->
+        <div class="foto-perfil-container">
+          <div class="foto-perfil" id="fotoPerfilPreview">👤</div>
+          <button id="btnUploadFoto" class="btn btn-sm negro">📷 Alterar Foto</button>
+          <input type="file" id="inputFotoPerfil" accept="image/*" class="oculto">
+        </div>
+        <form id="formPerfil">
+          <label for="perfilNome">Nome</label>
+          <input type="text" id="perfilNome" placeholder="Seu nome">
+          <label for="perfilEmail">Email</label>
+          <input type="email" id="perfilEmail" placeholder="seu@email.com">
+          <label for="perfilSenha">Nova senha (deixe em branco para manter)</label>
+          <div class="input-grupo">
+            <input type="password" id="perfilSenha" placeholder="Nova senha">
+            <button type="button" class="input-icone" id="toggleSenhaPerfil" title="Mostrar/ocultar senha" tabindex="0">👁️</button>
+          </div>
+          <div class="forca-senha" id="forcaSenhaPerfil"></div>
+          <!-- NOVO: Checkbox notificações por e-mail -->
+          <div class="checkbox-notif" style="margin: 10px 0;">
+            <input type="checkbox" id="notifEmail" checked>
+            <label for="notifEmail">Receber notificações por e-mail</label>
+          </div>
+          <button type="submit" class="btn">💾 Salvar Alterações</button>
+        </form>
+
+        <!-- NOVO: Reputação -->
+        <div style="margin-bottom:20px;">
+          <label>Reputação</label>
+          <div class="progresso" style="height:10px;">
+            <div id="barraReputacao" style="width: 0%; background: var(--texto-terciario);"></div>
+          </div>
+          <span id="textoReputacao" style="font-size:0.9em; color:var(--texto-secundario);">0 pontos</span>
+        </div>
+
+        <!-- NOVO: Metas diárias/semanais -->
+        <div class="glass" style="margin-top:20px;">
+          <h3 style="color:var(--dourado);">🎯 Minhas Metas</h3>
+          <label for="metaDiaria">Meta diária (Kz)</label>
+          <input type="number" id="metaDiaria" min="0" step="100" placeholder="Ex: 2000">
+          <label for="metaSemanal">Meta semanal (Kz)</label>
+          <input type="number" id="metaSemanal" min="0" step="500" placeholder="Ex: 10000">
+          <button class="btn" id="btnSalvarMetas">💾 Salvar Metas</button>
+          <div id="statusMetas" style="margin-top:10px;"></div>
+          <hr style="border-color:var(--borda-vidro);margin:15px 0;">
+          <div id="progressoMetas">
+            <p><strong>Progresso hoje:</strong> <span id="ganhoHoje">0 Kz</span> / <span id="metaDiariaValor">0 Kz</span></p>
+            <div class="progresso"><div id="barraDiaria" style="width:0%;"></div></div>
+            <p style="margin-top:10px;"><strong>Progresso esta semana:</strong> <span id="ganhoSemana">0 Kz</span> / <span id="metaSemanalValor">0 Kz</span></p>
+            <div class="progresso"><div id="barraSemanal" style="width:0%;"></div></div>
+          </div>
+        </div>
+
+        <!-- Seletor de Temas -->
+        <div class="selecao-tema">
+          <label>Tema:</label>
+          <div class="seletor-temas">
+            <div class="opcao-tema tema-escuro" data-tema="dark" title="Escuro">🌙</div>
+            <div class="opcao-tema tema-claro" data-tema="light" title="Claro">☀️</div>
+            <div class="opcao-tema tema-azul-marinho" data-tema="azul-marinho" title="Azul Marinho">🌊</div>
+            <div class="opcao-tema tema-vermelho" data-tema="vermelho" title="Vermelho">🔥</div>
+            <div class="opcao-tema tema-azul-normal" data-tema="azul-normal" title="Azul Normal">💙</div>
+          </div>
+        </div>
+        <button id="btnLogout" class="btn negro" style="margin-top:20px;">🚪 Sair</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== BOTÕES FLUTUANTES ========== -->
+  <!-- WhatsApp -->
+  <a href="https://wa.me/2399944660" target="_blank" class="whatsapp-float" title="Suporte WhatsApp">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+  </a>
+
+  <!-- Chat flutuante -->
+  <button id="btnChatFloat" class="chat-float-btn" title="Chat">
+    💬
+    <span id="bolhaNaoLidas" class="bolha-nao-lida oculto">0</span>
+  </button>
+  <!-- Janela do chat -->
+  <div id="chatJanela" class="chat-janela">
+    <div class="chat-cabecalho">
+      <span>💬 Mensagens</span>
+      <button id="chatFechar" class="chat-fechar">✕</button>
+    </div>
+    <div id="chatMensagens" class="chat-mensagens"></div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Escreva...">
+      <button id="chatEnviar" class="enviar-msg">➤</button>
     </div>
   </div>
 
-  <div class="creditos">
+  <!-- ========== RODAPÉ ========== -->
+  <footer class="creditos">
     <span class="selo-verificado">✔️ Verificado</span>
-    © <span id="ano2"></span> Pacheco Gonçalves — Todos os direitos reservados.
-  </div>
+    © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
+  </footer>
 
-  <!-- Scripts -->
+  <!-- ========== SCRIPTS ========== -->
+  <script src="../js/utils.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
-  <script src="../js/utils.js"></script>
   <script src="../js/participante.js"></script>
   <script>
     document.getElementById('ano').textContent = new Date().getFullYear();
-    document.getElementById('ano2').textContent = new Date().getFullYear();
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('../sw.js');
     }
 
-    (async () => {
-      const usuario = obterSessao();
-      if (!usuario) return;
-      const res = await api.listarTarefas(usuario.id);
-      if (!res.erro && res.tarefas) {
-        const select = document.getElementById('tarefaSelect');
-        res.tarefas.forEach(t => {
-          const opt = document.createElement('option');
-          opt.value = t.id;
-          opt.textContent = t.titulo + ' - ' + formatarMoeda(t.valor);
-          select.appendChild(opt);
-        });
-      }
-    })();
+    // Verificar autenticação ao carregar (redireciona se não logado)
+    document.addEventListener('DOMContentLoaded', () => {
+      verificarAutenticacao();
+      // O restante da inicialização fica a cargo do participante.js
+    });
   </script>
 </body>
 </html>

@@ -1,0 +1,87 @@
+/* ====== PÁGINA DE RECUPERAÇÃO DE SENHA ====== */
+
+.recuperacao-container {
+  padding: 35px 30px;
+  text-align: center;
+}
+
+.recuperacao-container img {
+  width: 70px;
+  margin-bottom: 15px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.recuperacao-container .logo-fallback {
+  font-size: 3em;
+  color: var(--dourado);
+  margin-bottom: 15px;
+}
+
+.recuperacao-container h2 {
+  color: var(--dourado);
+  margin-bottom: 8px;
+  font-size: 1.6em;
+}
+
+.recuperacao-container p {
+  color: var(--texto-secundario);
+  margin-bottom: 24px;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+
+.recuperacao-container input {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.recuperacao-container .btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1em;
+}
+
+.mensagem {
+  margin-top: 16px;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.mensagem.erro {
+  color: var(--erro);
+}
+
+.mensagem.sucesso {
+  color: var(--sucesso);
+}
+
+.link-login {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--dourado);
+  text-decoration: none;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.link-login:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* ====== RESPONSIVIDADE ====== */
+@media (max-width: 480px) {
+  .recuperacao-container {
+    padding: 25px 20px;
+    margin: 10px;
+  }
+
+  .recuperacao-container h2 {
+    font-size: 1.3em;
+  }
+
+  .recuperacao-container p {
+    font-size: 0.85em;
+  }
+}

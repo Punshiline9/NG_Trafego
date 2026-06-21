@@ -21,27 +21,30 @@
         <span data-form="cadastro">Cadastro</span>
       </div>
 
+      <!-- FORMULÁRIO DE LOGIN -->
       <div id="formLogin" class="form-box">
         <input type="text" id="userLogin" placeholder="Usuário ou email" autocomplete="username">
         <div class="input-grupo">
           <input type="password" id="senhaLogin" placeholder="Senha" autocomplete="current-password">
-          <span class="input-icone" id="toggleSenhaLogin" title="Mostrar senha">👁️</span>
+          <button type="button" class="input-icone" id="toggleSenhaLogin" title="Mostrar/ocultar senha" tabindex="0">👁️</button>
         </div>
         <div class="lembrar-checkbox">
           <input type="checkbox" id="lembrarLogin">
           <label for="lembrarLogin">Lembrar-me</label>
         </div>
         <button class="btn" id="btnLogin">Entrar</button>
+        <button class="btn btn-sm negro" id="btnBiometria" style="display:none;">🔐 Entrar com Biometria</button>
         <a href="recuperacao.html" class="link-recuperar">Esqueci a senha</a>
       </div>
 
+      <!-- FORMULÁRIO DE CADASTRO -->
       <div id="formCadastro" class="form-box oculto">
         <input type="text" id="nomeCad" placeholder="Nome completo">
         <input type="email" id="emailCad" placeholder="Email">
         <input type="text" id="userCad" placeholder="Usuário" autocomplete="off">
         <div class="input-grupo">
-          <input type="password" id="senhaCad" placeholder="Senha" autocomplete="new-password">
-          <span class="input-icone" id="toggleSenhaCad" title="Mostrar senha">👁️</span>
+          <input type="password" id="senhaCad" placeholder="Senha (mín. 6 caracteres)" autocomplete="new-password">
+          <button type="button" class="input-icone" id="toggleSenhaCad" title="Mostrar/ocultar senha" tabindex="0">👁️</button>
         </div>
         <div class="forca-senha" id="forcaSenha"></div>
         <button class="btn" id="btnCadastrar">Criar conta</button>
@@ -73,9 +76,9 @@
 
       <div class="contactos-info">
         <p>📱 Suporte WhatsApp:</p>
-        <a href="https://wa.me/2449944669" target="_blank" class="contacto-link">+244 994 466 9</a>
+        <a href="https://wa.me/2399944660" target="_blank" class="contacto-link">+239 994 466 0</a>
         <p style="margin-top:8px;">📧 Email:</p>
-        <a href="mailto:suporte@ngtrafego.com" class="contacto-link">suporte@ngtrafego.com</a>
+        <a href="mailto:punshiline9@gmail.com" class="contacto-link">punshiline9@gmail.com</a>
       </div>
     </div>
   </div>
@@ -95,12 +98,16 @@
       navigator.serviceWorker.register('../sw.js');
     }
 
-    // Toggle login/cadastro
+    // ========== ELEMENTOS ==========
     const spans = document.querySelectorAll('.form-toggle span');
     const formLogin = document.getElementById('formLogin');
     const formCadastro = document.getElementById('formCadastro');
     const msgErro = document.getElementById('msgErro');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnCadastrar = document.getElementById('btnCadastrar');
+    const btnBiometria = document.getElementById('btnBiometria');
 
+    // ========== TOGGLE LOGIN/CADASTRO ==========
     spans.forEach(span => {
       span.addEventListener('click', () => {
         spans.forEach(s => s.classList.remove('ativo'));
@@ -112,15 +119,34 @@
       });
     });
 
-    // Toggle visibilidade senha
-    toggleVisibilidadeSenha('senhaLogin', 'toggleSenhaLogin');
-    toggleVisibilidadeSenha('senhaCad', 'toggleSenhaCad');
+    // ========== TOGGLE VISIBILIDADE SENHA (acessível) ==========
+    function configurarToggleSenha(inputId, btnId) {
+      const input = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+      if (!input || !btn) return;
+      const alternar = () => {
+        const tipo = input.type === 'password' ? 'text' : 'password';
+        input.type = tipo;
+        btn.textContent = tipo === 'password' ? '👁️' : '🙈';
+      };
+      btn.addEventListener('click', alternar);
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternar(); }
+      });
+    }
+    configurarToggleSenha('senhaLogin', 'toggleSenhaLogin');
+    configurarToggleSenha('senhaCad', 'toggleSenhaCad');
 
-    // Força da senha
+    // ========== INDICADOR DE FORÇA DA SENHA ==========
     atualizarForcaSenha('senhaCad', 'forcaSenha');
 
-    // Login
-    document.getElementById('btnLogin').addEventListener('click', async () => {
+    // ========== VERIFICAR SUPORTE A BIOMETRIA ==========
+    if (window.PublicKeyCredential) {
+      btnBiometria.style.display = 'inline-flex';
+    }
+
+    // ========== LOGIN ==========
+    btnLogin.addEventListener('click', async () => {
       const user = document.getElementById('userLogin').value.trim();
       const senha = document.getElementById('senhaLogin').value;
       const lembrar = document.getElementById('lembrarLogin').checked;
@@ -132,8 +158,18 @@
       }
     });
 
-    // Cadastro
-    document.getElementById('btnCadastrar').addEventListener('click', async () => {
+    // ========== LOGIN COM BIOMETRIA ==========
+    btnBiometria.addEventListener('click', async () => {
+      msgErro.textContent = '';
+      try {
+        await loginComBiometria();
+      } catch (e) {
+        msgErro.textContent = e.message;
+      }
+    });
+
+    // ========== CADASTRO ==========
+    btnCadastrar.addEventListener('click', async () => {
       const dados = {
         nome: document.getElementById('nomeCad').value.trim(),
         email: document.getElementById('emailCad').value.trim(),
@@ -151,28 +187,37 @@
         return;
       }
 
-      if (dados.senha.length < 4) {
-        msgErro.textContent = 'Senha deve ter pelo menos 4 caracteres.';
+      if (dados.senha.length < 6) {
+        msgErro.textContent = 'Senha deve ter pelo menos 6 caracteres.';
         return;
       }
 
-      const res = await api.cadastrar(dados);
-      if (res.erro) {
-        msgErro.textContent = res.erro;
-      } else {
-        alert('Conta criada com sucesso! Faça login.');
-        document.querySelector('.form-toggle span[data-form="login"]').click();
-        document.getElementById('userLogin').value = dados.user;
+      btnCadastrar.disabled = true;
+      btnCadastrar.textContent = '🔄 Criando conta...';
+
+      try {
+        const res = await api.cadastrar(dados);
+        if (res.erro) {
+          msgErro.textContent = res.erro;
+        } else {
+          mostrarToast('Conta criada com sucesso! Faça login.', 'sucesso');
+          document.querySelector('.form-toggle span[data-form="login"]').click();
+          document.getElementById('userLogin').value = dados.user;
+        }
+      } catch (err) {
+        msgErro.textContent = 'Erro ao criar conta. Tente novamente.';
+      } finally {
+        btnCadastrar.disabled = false;
+        btnCadastrar.textContent = 'Criar conta';
       }
     });
 
-    // Enter para login
+    // ========== ENTER PARA SUBMETER ==========
     document.getElementById('senhaLogin').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('btnLogin').click();
+      if (e.key === 'Enter') btnLogin.click();
     });
-
     document.getElementById('senhaCad').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('btnCadastrar').click();
+      if (e.key === 'Enter') btnCadastrar.click();
     });
   </script>
 </body>
