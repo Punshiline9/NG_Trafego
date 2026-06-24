@@ -174,7 +174,6 @@ async function copiarTexto(texto) {
       return true;
     } catch (e) {}
   }
-  // fallback clássico
   const textarea = document.createElement('textarea');
   textarea.value = texto;
   textarea.style.position = 'fixed';
@@ -322,6 +321,42 @@ function criarToastContainer() {
 }
 
 // =============================================
+// 💰 SISTEMA DE PONTOS (NOVO)
+// =============================================
+const TAXA_PADRAO = 0.5; // 10 pontos = 5 Kz
+
+function obterTaxaConversao() {
+  const salva = localStorage.getItem('ng_taxa_conversao');
+  return salva ? parseFloat(salva) : TAXA_PADRAO;
+}
+
+function salvarTaxaConversao(taxa) {
+  localStorage.setItem('ng_taxa_conversao', taxa);
+}
+
+function converterPontosParaKz(pontos, taxa) {
+  const tx = taxa || obterTaxaConversao();
+  return pontos * tx;
+}
+
+function converterKzParaPontos(kz, taxa) {
+  const tx = taxa || obterTaxaConversao();
+  if (tx === 0) return 0;
+  return Math.round(kz / tx);
+}
+
+function formatarPontos(pontos) {
+  if (typeof pontos !== 'number' || isNaN(pontos)) pontos = 0;
+  return pontos.toLocaleString('pt-PT') + ' pts';
+}
+
+function formatarPontosComKz(pontos, taxa) {
+  const tx = taxa || obterTaxaConversao();
+  const kz = converterPontosParaKz(pontos, tx);
+  return `${formatarPontos(pontos)} (${formatarMoeda(kz)})`;
+}
+
+// =============================================
 // 🚀 INICIALIZAÇÃO AUTOMÁTICA
 // =============================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -364,3 +399,9 @@ window.mostrarToast = mostrarToast;
 window.ICONES_TEMA = ICONES_TEMA;
 window.NOMES_TEMA = NOMES_TEMA;
 window.TEMAS_DISPONIVEIS = TEMAS_DISPONIVEIS;
+window.obterTaxaConversao = obterTaxaConversao;
+window.salvarTaxaConversao = salvarTaxaConversao;
+window.converterPontosParaKz = converterPontosParaKz;
+window.converterKzParaPontos = converterKzParaPontos;
+window.formatarPontos = formatarPontos;
+window.formatarPontosComKz = formatarPontosComKz;

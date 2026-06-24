@@ -3,13 +3,12 @@
 // Versão reforçada com retry, cache, chat e mais
 // =============================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbySZwF8v3tFvGhBe9N6OWYwQv_ICS6RdW2p24UZ2PHEbqCvWMfmmM_SoCUKKPaObROaqw/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwz-s-naNGexX79GQvPuUugTNgUr7zWUzi2K3Lr4izAqF4t3HLyL7BBASzGA10IgjzwoA/exec';
 const API_TIMEOUT = 15000;
 const MAX_RETENTATIVAS = 2;
 
-// Cache simples em memória (sessão)
 const cache = new Map();
-const CACHE_TTL = 60000; // 1 minuto
+const CACHE_TTL = 60000;
 
 function getCache(chave) {
   const entry = cache.get(chave);
@@ -29,9 +28,6 @@ function invalidateCache() {
   cache.clear();
 }
 
-// =============================================
-// Chamada principal (com retry melhorado e cache opcional)
-// =============================================
 async function chamarAPI(acao, dados = {}, opcoes = {}) {
   const {
     timeout = API_TIMEOUT,
@@ -40,7 +36,6 @@ async function chamarAPI(acao, dados = {}, opcoes = {}) {
     cacheKey = null
   } = opcoes;
 
-  // Verificar cache
   if (usarCache && cacheKey) {
     const cached = getCache(cacheKey);
     if (cached) return cached;
@@ -81,7 +76,6 @@ async function chamarAPI(acao, dados = {}, opcoes = {}) {
       throw new Error('Resposta vazia do servidor');
     }
 
-    // Guardar em cache se solicitado
     if (usarCache && cacheKey) {
       setCache(cacheKey, json);
     }
@@ -105,14 +99,13 @@ async function chamarAPI(acao, dados = {}, opcoes = {}) {
   }
 }
 
-// =============================================
-// MÉTODOS PÚBLICOS (organizados por domínio)
-// =============================================
 const api = {
   // --- Autenticação ---
   login: (user, senha) => chamarAPI('login', { user, senha }),
   cadastrar: (dados) => chamarAPI('cadastrar', dados),
   recuperarSenha: (email) => chamarAPI('recuperar', { email }),
+  obterDesafioBiometria: () => chamarAPI('desafioBiometria'),
+  verificarBiometria: (dados) => chamarAPI('verificarBiometria', dados),
 
   // --- Participante ---
   listarTarefas: (userId) => chamarAPI('listarTarefas', { userId }, { usarCache: true, cacheKey: `tarefas_${userId}` }),
@@ -132,11 +125,11 @@ const api = {
     return chamarAPI('uploadFotoPerfil', fd);
   },
 
-  // --- Metas (NOVO) ---
+  // --- Metas ---
   verMetas: (userId) => chamarAPI('verMetas', { userId }),
-  salvarMetas: (dados) => chamarAPI('salvarMetas', dados), // { userId, diaria, semanal }
+  salvarMetas: (dados) => chamarAPI('salvarMetas', dados),
 
-  // --- Participantes (lista unificada) ---
+  // --- Participantes ---
   listarParticipantes: (userId) => chamarAPI('listarParticipantes', { userId }, { usarCache: true, cacheKey: `participantes_${userId}` }),
 
   // --- Tarefas Especiais ---
@@ -188,6 +181,27 @@ const api = {
   redefinirSenha: (userId, novaSenha, acao) => chamarAPI('redefinirSenha', { userId, nova: novaSenha, acao }),
   configSistema: (dados) => chamarAPI('configSistema', dados),
 
+  // --- Bónus de níveis ---
+  listarBonusPendentes: () => chamarAPI('listarBonusPendentes'),
+  aprovarBonus: (id) => chamarAPI('aprovarBonus', { id }),
+  rejeitarBonus: (id, motivo) => chamarAPI('rejeitarBonus', { id, motivo }),
+  listarBonusRecebidos: (userId) => chamarAPI('listarBonusRecebidos', { userId }),
+
+  // --- Mensagens motivacionais ---
+  listarMensagens: () => chamarAPI('listarMensagens', {}, { usarCache: true, cacheKey: 'mensagens' }),
+  criarMensagem: (dados) => {
+    invalidateCache();
+    return chamarAPI('criarMensagem', dados);
+  },
+  editarMensagem: (dados) => {
+    invalidateCache();
+    return chamarAPI('editarMensagem', dados);
+  },
+  eliminarMensagem: (id) => {
+    invalidateCache();
+    return chamarAPI('eliminarMensagem', { id });
+  },
+
   // --- Bots ---
   gerarBots: () => chamarAPI('gerarBots'),
   gerarBotsPersonalizados: (config) => chamarAPI('gerarBotsPersonalizados', config),
@@ -208,11 +222,18 @@ const api = {
   marcarLida: (userId, remetenteId) => chamarAPI('marcarLida', { userId, remetenteId }),
 
   // --- Busca ---
-  buscar: (termo) => chamarAPI('buscar', { termo })
+  buscar: (termo) => chamarAPI('buscar', { termo }),
+
+  // 🆕 Sub‑gestores
+  obterPermissoes: (userId) => chamarAPI('obterPermissoes', { userId }),
+  salvarPermissoes: (dados) => chamarAPI('salvarPermissoes', dados),
+
+  // 🆕 Modelos de tarefas
+  listarModelos: () => chamarAPI('listarModelos'),
+  criarModelo: (dados) => chamarAPI('criarModelo', dados),
+  editarModelo: (dados) => chamarAPI('editarModelo', dados),
+  eliminarModelo: (id) => chamarAPI('eliminarModelo', { id })
 };
 
-// =============================================
-// EXPORTAR PARA USO GLOBAL
-// =============================================
 window.api = api;
 window.invalidateCache = invalidateCache;

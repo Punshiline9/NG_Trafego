@@ -1,29 +1,35 @@
 // =============================================
-// 🔄 NG TAREFAS - SERVICE WORKER (VERSÃO REFORÇADA)
+// 🔄 NG TAREFAS - SERVICE WORKER (VERSÃO REFORÇADA v3)
 // =============================================
 
-const CACHE_NAME = 'ng-tarefas-v2';
+const CACHE_NAME = 'ng-tarefas-v3';
 const API_URL_PATTERN = 'script.google.com';  // evita cachear chamadas à API
 
-// Lista de recursos essenciais (caminhos relativos à raiz do projeto)
+// Lista atualizada de recursos essenciais
 const urlsToCache = [
   './',
   './index.html',
+  './404.html',                     // 🆕 página 404 personalizada
   './pages/login.html',
   './pages/recuperacao.html',
   './pages/participante.html',
   './pages/admin.html',
   './pages/custom.html',
+  './pages/podio.html',            // 🆕 página do pódio
   './css/comum.css',
   './css/login.css',
   './css/participante.css',
   './css/admin.css',
+  './css/podio.css',               // 🆕 estilos do pódio
   './js/api.js',
   './js/auth.js',
   './js/utils.js',
   './js/participante.js',
   './js/admin.js',
+  './js/podio.js',                 // 🆕 script do pódio
   './assets/imagens/logo.png',
+  './assets/imagens/icon-192.png',
+  './assets/imagens/icon-512.png',
   './manifest.json'
 ];
 
@@ -31,7 +37,7 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // Adiciona cada recurso individualmente, ignorando erros
+      console.log('🔄 SW: Cache em andamento...');
       return Promise.allSettled(
         urlsToCache.map(url =>
           cache.add(url).catch(err => {
@@ -41,7 +47,7 @@ self.addEventListener('install', event => {
       );
     }).then(() => {
       console.log('✅ SW: Cache inicial concluído');
-      return self.skipWaiting();
+      return self.skipWaiting(); // força ativação imediata
     })
   );
 });
@@ -57,13 +63,13 @@ self.addEventListener('activate', event => {
         })
       );
     }).then(() => {
-      console.log('✅ SW: Ativado e controlando clientes');
+      console.log('✅ SW: Ativado e controlando todos os clientes');
       return self.clients.claim();
     })
   );
 });
 
-// ----- FETCH (estratégia mista) -----
+// ----- FETCH (estratégia mista melhorada) -----
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
@@ -75,7 +81,7 @@ self.addEventListener('fetch', event => {
     return; // deixa o navegador fazer a requisição normalmente
   }
 
-  // Para navegação (HTML), usa network first com fallback para cache
+  // Para navegação (HTML), network first com fallback offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -88,7 +94,7 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(() => {
-          // Se offline, tenta servir do cache (ou fallback index.html)
+          // Se offline, tenta servir do cache; fallback final: index.html
           return caches.match(event.request).then(cachedResponse => {
             return cachedResponse || caches.match('./index.html');
           });
@@ -100,7 +106,7 @@ self.addEventListener('fetch', event => {
   // Para outros recursos (CSS, JS, imagens), cache-first com atualização em background
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
-      // Inicia busca na rede para atualizar cache
+      // Dispara atualização da cache em segundo plano
       const fetchPromise = fetch(event.request).then(networkResponse => {
         if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
@@ -111,8 +117,15 @@ self.addEventListener('fetch', event => {
         return networkResponse;
       }).catch(() => {});
 
-      // Retorna resposta cacheada imediatamente, ou espera pela rede
+      // Retorna resposta cacheada imediatamente, ou aguarda a rede
       return cachedResponse || fetchPromise;
     })
   );
+});
+
+// ----- MENSAGENS (para controle externo) -----
+self.addEventListener('message', event => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });

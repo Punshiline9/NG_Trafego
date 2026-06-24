@@ -1,5 +1,5 @@
 // =============================================
-// 🔐 NG TAREFAS - AUTENTICAÇÃO (VERSÃO REFORÇADA E CORRIGIDA PARA GITHUB PAGES)
+// 🔐 NG TAREFAS - AUTENTICAÇÃO (VERSÃO REFORÇADA COM SUB‑GESTORES)
 // =============================================
 
 const SESSION_KEY = 'ng_usuario';
@@ -8,12 +8,6 @@ const TENTATIVAS_KEY = 'ng_tentativas';
 const MAX_TENTATIVAS = 5;
 const BLOQUEIO_MINUTOS = 15;
 const SESSAO_EXPIRA_HORAS = 24;
-
-// Caminho base: deteta automaticamente se está no GitHub Pages ou local
-var BASE_PATH = '/';
-if (window.location.hostname.includes('github.io')) {
-  BASE_PATH = '/NG_Trafego/';
-}
 
 // ========== GERENCIAMENTO DE SESSÃO ==========
 
@@ -58,7 +52,7 @@ function logout(confirmar = true) {
   localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(LEMBRAR_KEY);
   sessionStorage.clear();
-  window.location.href = BASE_PATH + 'pages/login.html';
+  window.location.href = 'pages/login.html';
 }
 
 // ========== VERIFICAÇÕES DE ACESSO ==========
@@ -69,7 +63,7 @@ function verificarAutenticacao() {
     const caminhoAtual = window.location.pathname;
     const nomePagina = caminhoAtual.split('/').pop();
     if (nomePagina !== 'login.html' && nomePagina !== 'recuperacao.html' && nomePagina !== 'custom.html' && nomePagina !== '') {
-      window.location.href = BASE_PATH + 'pages/login.html?redir=' + encodeURIComponent(caminhoAtual);
+      window.location.href = 'pages/login.html?redir=' + encodeURIComponent(caminhoAtual);
     }
     return null;
   }
@@ -79,9 +73,10 @@ function verificarAutenticacao() {
 function verificarGestor() {
   const u = verificarAutenticacao();
   if (!u) return null;
-  if (u.tipo !== 'gestor') {
+  // Permite tanto 'gestor' quanto 'subgestor'
+  if (u.tipo !== 'gestor' && u.tipo !== 'subgestor') {
     alert('⛔ Acesso restrito a gestores.');
-    window.location.href = BASE_PATH + 'pages/participante.html';
+    window.location.href = 'pages/participante.html';
     return null;
   }
   return u;
@@ -145,12 +140,13 @@ async function login(user, senha, lembrar = false) {
     const params = new URLSearchParams(window.location.search);
     const redir = params.get('redir');
 
+    // 🆕 Sub‑gestores também vão para o painel admin
     if (redir) {
       window.location.href = redir;
     } else {
-      window.location.href = res.usuario.tipo === 'gestor'
-        ? BASE_PATH + 'pages/admin.html'
-        : BASE_PATH + 'pages/participante.html';
+      window.location.href = (res.usuario.tipo === 'gestor' || res.usuario.tipo === 'subgestor')
+        ? 'pages/admin.html'
+        : 'pages/participante.html';
     }
   } catch (e) {
     if (btn) {
@@ -161,6 +157,7 @@ async function login(user, senha, lembrar = false) {
   }
 }
 
+// Login com biometria (WebAuthn)
 async function loginComBiometria() {
   if (!window.PublicKeyCredential) {
     throw new Error('Biometria não suportada neste dispositivo.');
@@ -186,9 +183,9 @@ async function loginComBiometria() {
 
     resetarTentativas();
     salvarSessao(verificacao.usuario, false);
-    window.location.href = verificacao.usuario.tipo === 'gestor'
-      ? BASE_PATH + 'pages/admin.html'
-      : BASE_PATH + 'pages/participante.html';
+    window.location.href = (verificacao.usuario.tipo === 'gestor' || verificacao.usuario.tipo === 'subgestor')
+      ? 'pages/admin.html'
+      : 'pages/participante.html';
   } catch (e) {
     console.error('Erro na autenticação biométrica:', e);
     throw new Error('Falha na autenticação biométrica. Utilize usuário e senha.');
@@ -242,9 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.location.pathname.includes('login.html')) {
     const sessao = obterSessao();
     if (sessao) {
-      window.location.href = sessao.tipo === 'gestor'
-        ? BASE_PATH + 'pages/admin.html'
-        : BASE_PATH + 'pages/participante.html';
+      window.location.href = (sessao.tipo === 'gestor' || sessao.tipo === 'subgestor')
+        ? 'pages/admin.html'
+        : 'pages/participante.html';
     }
   }
 });

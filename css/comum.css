@@ -282,7 +282,7 @@ select option { background: #1a1a1a; color: #fff; }
   box-shadow: 0 4px 15px rgba(255,215,0,0.3);
 }
 
-/* ====== TOASTS - CORES VIBRANTES ====== */
+/* ====== TOASTS ====== */
 .toast-container {
   position: fixed;
   top: 20px;
@@ -364,7 +364,6 @@ select option { background: #1a1a1a; color: #fff; }
   padding-right: 14px;
 }
 
-/* ====== ÍCONE ❗ NA SIDEBAR (DETALHES) ====== */
 .sidebar-detalhes-icone {
   display: inline-block;
   background: var(--dourado);
@@ -381,9 +380,7 @@ select option { background: #1a1a1a; color: #fff; }
   box-shadow: 0 0 8px var(--dourado);
   transition: transform 0.2s;
 }
-.sidebar-detalhes-icone:hover {
-  transform: scale(1.15);
-}
+.sidebar-detalhes-icone:hover { transform: scale(1.15); }
 
 /* ====== SELETOR DE TEMAS ====== */
 .seletor-temas {
@@ -413,7 +410,7 @@ select option { background: #1a1a1a; color: #fff; }
 .tema-vermelho { background: #7f1d1d; }
 .tema-azul-normal { background: #1e3a8a; }
 
-/* ====== LISTA DE PARTICIPANTES (UNIFICADA) ====== */
+/* ====== LISTA DE PARTICIPANTES ====== */
 .lista-participantes {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -449,7 +446,7 @@ select option { background: #1a1a1a; color: #fff; }
   margin-top: 4px;
 }
 
-/* ====== UPLOAD DE FOTO/IMAGEM ====== */
+/* ====== UPLOAD ====== */
 .upload-area {
   border: 2px dashed var(--borda-vidro);
   border-radius: 12px;
@@ -467,7 +464,7 @@ select option { background: #1a1a1a; color: #fff; }
 .upload-area p { color: var(--texto-terciario); font-size: 0.9em; }
 .upload-area input[type="file"] { display: none; }
 
-/* ====== PERFIL (EDIT) ====== */
+/* ====== PERFIL ====== */
 .foto-perfil-container {
   display: flex;
   flex-direction: column;
@@ -508,7 +505,7 @@ select option { background: #1a1a1a; color: #fff; }
   100% { background-position: -200% 0; }
 }
 
-/* ====== ANÚNCIOS ROLANTES (FAIXA SUPERIOR) ====== */
+/* ====== ANÚNCIOS ROLANTES ====== */
 .anuncios-rolantes {
   position: sticky;
   top: 0;
@@ -554,10 +551,10 @@ select option { background: #1a1a1a; color: #fff; }
   object-fit: cover;
 }
 
-/* ====== BOTÃO FLUTUANTE WHATSAPP ====== */
+/* ====== WHATSAPP FLUTUANTE ====== */
 .whatsapp-float {
   position: fixed;
-  bottom: 90px; /* acima dos créditos e do chat */
+  bottom: 90px;
   right: 20px;
   z-index: 9998;
   background: #25D366;
@@ -620,7 +617,6 @@ select option { background: #1a1a1a; color: #fff; }
   justify-content: center;
 }
 
-/* Janela do chat */
 .chat-janela {
   position: fixed;
   bottom: 90px;
@@ -703,6 +699,197 @@ select option { background: #1a1a1a; color: #fff; }
   font-size: 1.2em;
 }
 
+/* ====== NOVO: ÍCONE DE CÓPIA ====== */
+.btn-copiar {
+  background: transparent;
+  border: 1px solid var(--borda-vidro);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 1em;
+  color: var(--texto-secundario);
+  transition: all 0.2s;
+}
+.btn-copiar:hover {
+  border-color: var(--dourado);
+  color: var(--dourado);
+  background: rgba(255,215,0,0.08);
+}
+
+/* ====== NOVO: CHECKLIST DE REGRAS ====== */
+.checklist-regras {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0;
+}
+.checklist-regras li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--borda-vidro);
+  color: var(--texto-secundario);
+  font-size: 0.95em;
+  transition: background 0.2s;
+}
+.checklist-regras li:hover {
+  background: rgba(255,215,0,0.03);
+}
+.checklist-regras li .check-regra {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid var(--borda-vidro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8em;
+  color: transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.checklist-regras li.ativa .check-regra {
+  border-color: var(--sucesso);
+  background: var(--sucesso);
+  color: #fff;
+}
+
+/* ====== NOVOS ESTILOS PARA AS MELHORIAS (adicionados) ====== */
+
+/* --- CHECKLIST DE REGRAS (GESTOR) --- */
+.checklist-admin {
+  margin-top: 15px;
+}
+
+.checklist-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.checklist-input input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.checklist-regras-admin {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0;
+}
+
+.checklist-regras-admin li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--borda-vidro);
+  color: var(--texto-secundario);
+  font-size: 0.95em;
+  transition: background 0.2s;
+  background: var(--vidro-claro);
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.checklist-regras-admin li:hover {
+  background: rgba(255,215,0,0.05);
+}
+
+.checklist-regras-admin .texto-regra {
+  flex: 1;
+  cursor: pointer;
+}
+
+.checklist-regras-admin .acoes-regra {
+  display: flex;
+  gap: 6px;
+}
+
+.checklist-regras-admin .check-regra {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 2px solid var(--borda-vidro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85em;
+  color: transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checklist-regras-admin li.ativa .check-regra {
+  border-color: var(--sucesso);
+  background: var(--sucesso);
+  color: #fff;
+}
+
+/* --- POP‑UP MOTIVACIONAL --- */
+.popup-motivacional {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  animation: fadeIn 0.3s ease;
+}
+
+.popup-conteudo {
+  background: var(--vidro);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--dourado);
+  border-radius: 16px;
+  padding: 30px 25px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(255,215,0,0.3);
+  color: var(--texto);
+}
+
+.popup-conteudo p {
+  font-size: 1.1em;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* --- MEDALHAS NO PERFIL --- */
+.medalhas-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.medalha-item {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(255,215,0,0.08);
+  border: 1px solid var(--borda-vidro);
+  border-radius: 20px;
+  font-size: 0.8em;
+  color: var(--dourado);
+}
+
+/* --- MODAL DE PERMISSÕES (SUB‑GESTORES) --- */
+.modal-permissoes .modal-box {
+  text-align: left;
+}
+
+.modal-permissoes label {
+  display: block;
+  margin: 8px 0;
+  color: var(--texto-secundario);
+  cursor: pointer;
+}
+
 /* ====== UTILITÁRIOS ====== */
 .oculto { display: none !important; }
 .erro { color: var(--erro); font-size: 0.9em; margin-bottom: 10px; font-weight: 600; }
@@ -743,32 +930,13 @@ select option { background: #1a1a1a; color: #fff; }
     width: 44px; height: 44px; padding: 0;
     display: flex; align-items: center; justify-content: center;
   }
-  .lista-participantes {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-  .toast-container {
-    max-width: 95%;
-    right: 10px;
-    top: 10px;
-  }
-  .chat-janela {
-    width: 300px;
-    height: 400px;
-    right: 10px;
-    bottom: 80px;
-  }
-  .whatsapp-float {
-    bottom: 80px;
-    right: 10px;
-  }
-  .chat-float-btn {
-    bottom: 150px;
-    right: 10px;
-  }
+  .lista-participantes { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .toast-container { max-width: 95%; right: 10px; top: 10px; }
+  .chat-janela { width: 300px; height: 400px; right: 10px; bottom: 80px; }
+  .whatsapp-float { bottom: 80px; right: 10px; }
+  .chat-float-btn { bottom: 150px; right: 10px; }
 }
 @media (max-width: 400px) {
-  .lista-participantes {
-    grid-template-columns: 1fr 1fr;
-  }
+  .lista-participantes { grid-template-columns: 1fr 1fr; }
   .foto-perfil { width: 70px; height: 70px; font-size: 2em; }
 }
