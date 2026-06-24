@@ -1,12 +1,17 @@
 {
-  "name": "NG Tarefas",
+  "name": "NG Tarefas - Ganhe dinheiro real",
   "short_name": "NG Tarefas",
-  "description": "Complete tarefas, acumule pontos e ganhe dinheiro real.",
+  "description": "Complete tarefas, acumule pontos, suba de nível, ganhe bónus e converta em dinheiro real. Sistema gamificado com suporte WhatsApp e pagamentos em Kwanzas.",
   "start_url": "./index.html",
+  "scope": "./",
+  "id": "ng-tarefas-pwa-v1",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#FFD700",
   "orientation": "portrait-primary",
+  "dir": "ltr",
+  "lang": "pt",
+  "categories": ["productivity", "finance", "utilities"],
   "icons": [
     {
       "src": "./assets/imagens/icon-192.png",
@@ -26,10 +31,36 @@
       "src": "./assets/imagens/screenshot1.png",
       "sizes": "1080x1920",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Painel do participante"
     }
   ],
-  "categories": ["productivity", "finance"],
-  "lang": "pt",
-  "dir": "ltr"
+  "shortcuts": [
+    {
+      "name": "Painel",
+      "short_name": "Painel",
+      "description": "Ir para o painel do participante",
+      "url": "./pages/participante.html",
+      "icons": [
+        {
+          "src": "./assets/imagens/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Tarefas",
+      "short_name": "Tarefas",
+      "description": "Ver tarefas disponíveis",
+      "url": "./pages/participante.html?aba=tarefas",
+      "icons": [
+        {
+          "src": "./assets/imagens/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

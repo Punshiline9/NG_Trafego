@@ -18,7 +18,7 @@
     <div class="resumo-rapido">
       <div class="resumo-item">
         <span class="resumo-icone">💰</span>
-        <span class="resumo-valor" id="saldoAtual">0,00 Kz</span>
+        <span class="resumo-valor" id="saldoAtual">0 pts</span>
         <span class="resumo-label">Saldo</span>
       </div>
       <div class="resumo-item">
@@ -31,7 +31,6 @@
         <span class="resumo-valor" id="nivelAtual">Bronze</span>
         <span class="resumo-label">Nível</span>
       </div>
-      <!-- NOVO: Reputação -->
       <div class="resumo-item">
         <span class="resumo-icone">🏅</span>
         <span class="resumo-valor" id="reputacao">--</span>
@@ -43,7 +42,6 @@
       <div class="barra-nivel-preenchida" id="barraNivel" style="width: 0%;"></div>
       <span class="barra-nivel-texto" id="pontosNivel">0 / 100 pontos</span>
     </div>
-    <!-- Botão Modo Foco -->
     <button id="btnModoFoco" class="btn-icone" title="Modo Foco (oculta distrações)">🧘</button>
   </header>
 
@@ -70,11 +68,9 @@
       </div>
       <div class="tarefas-layout">
         <div id="listaTarefas" class="lista-tarefas">
-          <!-- Cards de tarefas gerados dinamicamente -->
           <div class="skeleton" style="height:60px;"></div>
           <div class="skeleton" style="height:60px;margin-top:10px;"></div>
         </div>
-        <!-- Sidebar de detalhes (abre ao clicar no ícone ❗) -->
         <aside id="sidebarDetalhes" class="sidebar-overlay">
           <div class="sidebar-conteudo">
             <h3 id="detalhesTitulo">Detalhes da Tarefa</h3>
@@ -121,7 +117,6 @@
     <section id="especiais" class="aba-painel oculto">
       <div id="especiaisPainel">
         <button id="btnNovaEspecial" class="btn" style="margin-bottom:20px;">➕ Criar Tarefa Especial</button>
-        <!-- Formulário de criação (inicialmente oculto) -->
         <div id="formEspecialContainer" class="glass oculto">
           <h4>📝 Criar Tarefa Especial</h4>
           <form id="formEspecial">
@@ -147,16 +142,13 @@
     <!-- ===== ABA DICAS ===== -->
     <section id="dicas" class="aba-painel oculto">
       <div id="dicasPainel">
-        <!-- Sub-abas internas -->
         <div class="abas sub-abas" id="subAbasDicas">
           <button class="ativo" data-subaba="aplicativos">📱 Aplicativos</button>
           <button data-subaba="regras">📜 Regras</button>
           <button data-subaba="ajuda">❓ Ajuda</button>
           <button data-subaba="reclamacoes">📢 Reclamações</button>
         </div>
-        <!-- Conteúdo das sub-abas -->
         <div id="subAplicativos" class="subaba-painel">
-          <!-- Upload de aplicativo -->
           <div class="upload-app-container glass" style="margin-bottom:20px;">
             <h4>📤 Enviar Aplicativo/Dica</h4>
             <form id="formAplicativo">
@@ -170,7 +162,6 @@
               <button type="submit" class="btn">Enviar (moderação pendente)</button>
             </form>
           </div>
-          <!-- Lista de aplicativos aprovados -->
           <div id="listaAplicativos"></div>
         </div>
         <div id="subRegras" class="subaba-painel oculto">
@@ -197,8 +188,8 @@
     <section id="resgate" class="aba-painel oculto">
       <div id="resgatePainel" class="glass">
         <h3>💸 Solicitar Saque</h3>
-        <p>Saldo disponível: <strong id="saldoResgate">0,00 Kz</strong></p>
-        <p style="color:var(--aviso);">Valor mínimo de saque: <strong>500 Kz</strong></p>
+        <p>Saldo disponível: <strong id="saldoResgate">0 pts (0,00 Kz)</strong></p>
+        <p style="color:var(--aviso);">Valor mínimo de saque: <strong>500 Kz (1000 pontos)</strong></p>
         <label for="valorSaque">Valor (Kz)</label>
         <input type="number" id="valorSaque" min="500" step="100" placeholder="Mínimo 500 Kz">
         <label for="metodoSaque">Método de pagamento</label>
@@ -209,7 +200,6 @@
           <option value="unitel">Unitel Money</option>
           <option value="bancaria">Transferência Bancária</option>
         </select>
-        <!-- Campos condicionais (ex: número de telefone, IBAN) -->
         <div id="camposExtrasSaque"></div>
         <button id="btnSolicitarSaque" class="btn" style="width:100%;">🔔 Solicitar Saque</button>
         <div id="statusSaque"></div>
@@ -237,7 +227,6 @@
             <button type="button" class="input-icone" id="toggleSenhaPerfil" title="Mostrar/ocultar senha" tabindex="0">👁️</button>
           </div>
           <div class="forca-senha" id="forcaSenhaPerfil"></div>
-          <!-- NOVO: Checkbox notificações por e-mail -->
           <div class="checkbox-notif" style="margin: 10px 0;">
             <input type="checkbox" id="notifEmail" checked>
             <label for="notifEmail">Receber notificações por e-mail</label>
@@ -245,7 +234,13 @@
           <button type="submit" class="btn">💾 Salvar Alterações</button>
         </form>
 
-        <!-- NOVO: Reputação -->
+        <!-- NOVO: Medalhas (bónus já recebidos) -->
+        <div style="margin-bottom:20px;">
+          <h4 style="color:var(--dourado);">🏅 Medalhas</h4>
+          <div id="medalhasContainer"></div>
+        </div>
+
+        <!-- Reputação -->
         <div style="margin-bottom:20px;">
           <label>Reputação</label>
           <div class="progresso" style="height:10px;">
@@ -254,7 +249,7 @@
           <span id="textoReputacao" style="font-size:0.9em; color:var(--texto-secundario);">0 pontos</span>
         </div>
 
-        <!-- NOVO: Metas diárias/semanais -->
+        <!-- Metas diárias/semanais -->
         <div class="glass" style="margin-top:20px;">
           <h3 style="color:var(--dourado);">🎯 Minhas Metas</h3>
           <label for="metaDiaria">Meta diária (Kz)</label>
@@ -289,17 +284,14 @@
   </main>
 
   <!-- ========== BOTÕES FLUTUANTES ========== -->
-  <!-- WhatsApp -->
   <a href="https://wa.me/2399944660" target="_blank" class="whatsapp-float" title="Suporte WhatsApp">
     <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
   </a>
 
-  <!-- Chat flutuante -->
   <button id="btnChatFloat" class="chat-float-btn" title="Chat">
     💬
     <span id="bolhaNaoLidas" class="bolha-nao-lida oculto">0</span>
   </button>
-  <!-- Janela do chat -->
   <div id="chatJanela" class="chat-janela">
     <div class="chat-cabecalho">
       <span>💬 Mensagens</span>
@@ -312,28 +304,22 @@
     </div>
   </div>
 
-  <!-- ========== RODAPÉ ========== -->
   <footer class="creditos">
     <span class="selo-verificado">✔️ Verificado</span>
     © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
   </footer>
 
-  <!-- ========== SCRIPTS ========== -->
   <script src="../js/utils.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/participante.js"></script>
   <script>
     document.getElementById('ano').textContent = new Date().getFullYear();
-
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('../sw.js');
     }
-
-    // Verificar autenticação ao carregar (redireciona se não logado)
     document.addEventListener('DOMContentLoaded', () => {
       verificarAutenticacao();
-      // O restante da inicialização fica a cargo do participante.js
     });
   </script>
 </body>

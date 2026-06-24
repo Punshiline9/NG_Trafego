@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página não encontrada</title>
+  <style>
+    :root {
+      --dourado: #FFD700;
+      --preto: #000;
+      --erro: #ff4d4d;
+      --texto: #fff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--preto);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+    }
+    .toast-404 {
+      background: #7F1D1D;
+      color: #FCA5A5;
+      border-left: 5px solid #EF4444;
+      padding: 20px 30px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1.1em;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.4s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toast-404">
+    <span>⚠️</span> Página indisponível. Será redirecionado...
+  </div>
+
+  <script>
+    (function() {
+      setTimeout(() => {
+        if (document.referrer && document.referrer !== window.location.href) {
+          window.history.back();
+        } else {
+          window.location.href = './index.html';
+        }
+      }, 3000);
+    })();
+  </script>
+</body>
+</html>

@@ -9,227 +9,245 @@
   <link rel="manifest" href="../manifest.json">
 </head>
 <body>
-  <!-- ========== CABEÇALHO DO GESTOR ========== -->
   <header class="admin-cabecalho glass">
     <div class="saudacao-admin">
       <h1 id="nomeGestor">Painel do Gestor</h1>
       <span class="id-usuario" id="idGestor">ID: carregando...</span>
     </div>
     <div class="resumo-admin">
-      <div class="resumo-item">
-        <span class="resumo-icone">👥</span>
-        <span class="resumo-valor" id="totalHumanos">0</span>
-        <span class="resumo-label">Humanos</span>
-      </div>
-      <div class="resumo-item">
-        <span class="resumo-icone">🤖</span>
-        <span class="resumo-valor" id="totalBots">0</span>
-        <span class="resumo-label">Bots</span>
-      </div>
-      <div class="resumo-item">
-        <span class="resumo-icone">⏳</span>
-        <span class="resumo-valor" id="pendentesAprovacao">0</span>
-        <span class="resumo-label">Pendentes</span>
-      </div>
-      <div class="resumo-item">
-        <span class="resumo-icone">💸</span>
-        <span class="resumo-valor" id="saquesPendentes">0</span>
-        <span class="resumo-label">Saques</span>
-      </div>
+      <div class="resumo-item"><span class="resumo-icone">👥</span><span class="resumo-valor" id="totalHumanos">0</span><span class="resumo-label">Humanos</span></div>
+      <div class="resumo-item"><span class="resumo-icone">🤖</span><span class="resumo-valor" id="totalBots">0</span><span class="resumo-label">Bots</span></div>
+      <div class="resumo-item"><span class="resumo-icone">⏳</span><span class="resumo-valor" id="pendentesAprovacao">0</span><span class="resumo-label">Pendentes</span></div>
+      <div class="resumo-item"><span class="resumo-icone">💸</span><span class="resumo-valor" id="saquesPendentes">0</span><span class="resumo-label">Saques</span></div>
     </div>
     <button class="btn negro btn-sm" id="btnLogout" style="position:absolute;top:15px;right:15px;">🚪 Sair</button>
   </header>
 
-  <!-- ========== ANÚNCIOS ROLANTES ========== -->
   <div id="anunciosRolantes" class="anuncios-rolantes" style="margin-bottom:15px;"></div>
 
-  <!-- ========== PAINEL PRINCIPAL ========== -->
   <main class="admin-principal glass">
     <nav class="abas" id="abasAdmin" role="tablist">
-      <button type="button" class="ativo" data-aba="aprovacoes" role="tab" aria-selected="true" aria-controls="aprovacoes">✅ Aprovações</button>
-      <button type="button" data-aba="saques" role="tab" aria-selected="false" aria-controls="saques">💸 Saques</button>
-      <button type="button" data-aba="tarefasAdmin" role="tab" aria-selected="false" aria-controls="tarefasAdmin">📝 Tarefas</button>
-      <button type="button" data-aba="especiaisAdmin" role="tab" aria-selected="false" aria-controls="especiaisAdmin">⭐ Tarefas Especiais</button>
-      <button type="button" data-aba="utilizadores" role="tab" aria-selected="false" aria-controls="utilizadores">👥 Utilizadores</button>
-      <button type="button" data-aba="bots" role="tab" aria-selected="false" aria-controls="bots">🤖 Bots</button>
-      <button type="button" data-aba="anuncios" role="tab" aria-selected="false" aria-controls="anuncios">📢 Anúncios</button>
-      <button type="button" data-aba="dicasAdmin" role="tab" aria-selected="false" aria-controls="dicasAdmin">📖 Dicas</button>
-      <button type="button" data-aba="paginas" role="tab" aria-selected="false" aria-controls="paginas">📄 Páginas</button>
-      <button type="button" data-aba="config" role="tab" aria-selected="false" aria-controls="config">⚙️ Config</button>
-      <button type="button" data-aba="chatAdmin" role="tab" aria-selected="false" aria-controls="chatAdmin">💬 Chat</button>
+      <button type="button" class="ativo" data-aba="aprovacoes">✅ Aprovações</button>
+      <button type="button" data-aba="saques">💸 Saques</button>
+      <button type="button" data-aba="tarefasAdmin">📝 Tarefas</button>
+      <button type="button" data-aba="especiaisAdmin">⭐ Tarefas Especiais</button>
+      <button type="button" data-aba="utilizadores">👥 Utilizadores</button>
+      <button type="button" data-aba="subgestores">🛡️ Sub‑Gestores</button>
+      <button type="button" data-aba="bots">🤖 Bots</button>
+      <button type="button" data-aba="anuncios">📢 Anúncios</button>
+      <button type="button" data-aba="dicasAdmin">📖 Dicas</button>
+      <button type="button" data-aba="paginas">📄 Páginas</button>
+      <button type="button" data-aba="bonus">🏆 Bónus</button>
+      <button type="button" data-aba="mensagens">💬 Mensagens</button>
+      <button type="button" data-aba="config">⚙️ Config</button>
+      <button type="button" data-aba="chatAdmin">💬 Chat</button>
     </nav>
 
     <!-- ===== ABA APROVAÇÕES ===== -->
     <section id="aprovacoes" class="aba-painel" role="tabpanel">
-      <div id="listaAprovacoes">
-        <div class="skeleton" style="height:80px;"></div>
-        <div class="skeleton" style="height:80px;margin-top:10px;"></div>
-      </div>
+      <div id="listaAprovacoes"><div class="skeleton" style="height:80px;"></div><div class="skeleton" style="height:80px;margin-top:10px;"></div></div>
     </section>
 
     <!-- ===== ABA SAQUES ===== -->
     <section id="saques" class="aba-painel oculto" role="tabpanel">
-      <div id="listaSaques">
-        <p>Carregando pedidos de saque...</p>
-      </div>
+      <div id="listaSaques"><p>Carregando pedidos de saque...</p></div>
     </section>
 
-    <!-- ===== ABA TAREFAS (CRUD) ===== -->
+    <!-- ===== ABA TAREFAS (com sub‑aba Modelos) ===== -->
     <section id="tarefasAdmin" class="aba-painel oculto" role="tabpanel">
-      <button type="button" class="btn" id="btnNovaTarefa" style="margin-bottom:20px;">➕ Nova Tarefa</button>
-      <div id="formTarefaContainer" class="glass oculto">
-        <h3 id="tituloFormTarefa">Nova Tarefa</h3>
-        <form id="formTarefa">
-          <input type="hidden" id="tarefaIdEdit">
-          <label for="tarefaTitulo">Título</label>
-          <input type="text" id="tarefaTitulo" required>
-          <label for="tarefaDescricao">Descrição</label>
-          <textarea id="tarefaDescricao" rows="3"></textarea>
-          <label for="tarefaValor">Valor (Kz)</label>
-          <input type="number" id="tarefaValor" min="0" step="50">
-          <label for="tarefaNivel">Nível</label>
-          <select id="tarefaNivel">
-            <option value="Todos">Todos</option>
-            <option value="Bronze">Bronze</option>
-            <option value="Prata">Prata</option>
-            <option value="Ouro">Ouro</option>
-            <option value="Platina">Platina</option>
-            <option value="Diamante">Diamante</option>
-          </select>
-          <label for="tarefaTempo">Tempo Estimado</label>
-          <input type="text" id="tarefaTempo" placeholder="Ex: 5 min">
-          <!-- 📅 NOVO: Campo de Prazo -->
-          <label for="tarefaPrazo">Prazo (opcional)</label>
-          <input type="datetime-local" id="tarefaPrazo">
-          <div class="upload-area" id="uploadTarefaImagem">
-            <span class="icone-upload">🖼️</span>
-            <p>Imagem da tarefa (opcional)</p>
-            <input type="file" id="tarefaImagem" accept="image/*">
-          </div>
-          <div class="checkbox-anuncio">
-            <input type="checkbox" id="criarAnuncioTarefa">
-            <label for="criarAnuncioTarefa">Criar anúncio automaticamente ao salvar</label>
-          </div>
-          <button type="submit" class="btn" style="width:100%;">💾 Salvar Tarefa</button>
-        </form>
+      <div class="abas sub-abas" id="subAbasTarefas">
+        <button type="button" class="ativo" data-subaba="tarefasLista">📋 Tarefas</button>
+        <button type="button" data-subaba="modelos">🧩 Modelos</button>
       </div>
-      <div id="listaTarefasAdmin"></div>
+      <div id="subTarefasLista" class="subaba-painel">
+        <button type="button" class="btn" id="btnNovaTarefa" style="margin-bottom:20px;">➕ Nova Tarefa</button>
+        <div id="formTarefaContainer" class="glass oculto">
+          <h3 id="tituloFormTarefa">Nova Tarefa</h3>
+          <form id="formTarefa">
+            <input type="hidden" id="tarefaIdEdit">
+            <label for="tarefaTitulo">Título</label><input type="text" id="tarefaTitulo" required>
+            <label for="tarefaDescricao">Descrição</label><textarea id="tarefaDescricao" rows="3"></textarea>
+            <label for="tarefaPontos">Pontos</label><input type="number" id="tarefaPontos" min="1" step="1" required>
+            <label for="tarefaValorKz">Valor em Kz (calculado)</label><input type="text" id="tarefaValorKz" readonly>
+            <label for="tarefaNivel">Nível</label>
+            <select id="tarefaNivel">
+              <option value="Todos">Todos</option><option value="Bronze">Bronze</option><option value="Prata">Prata</option><option value="Ouro">Ouro</option><option value="Platina">Platina</option><option value="Diamante">Diamante</option>
+            </select>
+            <label for="tarefaTempo">Tempo Estimado</label><input type="text" id="tarefaTempo" placeholder="Ex: 5 min">
+            <label for="tarefaPrazo">Prazo (opcional)</label><input type="datetime-local" id="tarefaPrazo">
+            <div class="upload-area" id="uploadTarefaImagem"><span class="icone-upload">🖼️</span><p>Imagem da tarefa (opcional)</p><input type="file" id="tarefaImagem" accept="image/*"></div>
+            <div class="checkbox-anuncio"><input type="checkbox" id="criarAnuncioTarefa"><label for="criarAnuncioTarefa">Criar anúncio automaticamente ao salvar</label></div>
+            <button type="submit" class="btn" style="width:100%;">💾 Salvar Tarefa</button>
+          </form>
+        </div>
+        <!-- Para sub‑gestores: seletor de modelo antes do formulário -->
+        <div id="modeloRapidoContainer" class="glass oculto">
+          <h4>Selecione um modelo de tarefa</h4>
+          <select id="modeloRapidoSelect"><option value="">— Escolha um modelo —</option></select>
+          <button class="btn btn-sm" id="btnUsarModelo" style="margin-top:10px;">▶️ Usar modelo</button>
+        </div>
+        <div id="listaTarefasAdmin"></div>
+      </div>
+      <!-- Sub‑aba Modelos -->
+      <div id="subModelos" class="subaba-painel oculto">
+        <button type="button" class="btn" id="btnNovoModelo" style="margin-bottom:20px;">➕ Novo Modelo</button>
+        <div id="formModeloContainer" class="glass oculto">
+          <h3>Novo Modelo de Tarefa</h3>
+          <form id="formModelo">
+            <input type="hidden" id="modeloIdEdit">
+            <label for="modeloTitulo">Título</label><input type="text" id="modeloTitulo" required>
+            <label for="modeloDescricao">Descrição</label><textarea id="modeloDescricao" rows="3"></textarea>
+            <label for="modeloPontos">Pontos</label><input type="number" id="modeloPontos" min="1" required>
+            <label for="modeloNivel">Nível</label>
+            <select id="modeloNivel">
+              <option value="Todos">Todos</option><option value="Bronze">Bronze</option><option value="Prata">Prata</option><option value="Ouro">Ouro</option><option value="Platina">Platina</option><option value="Diamante">Diamante</option>
+            </select>
+            <label for="modeloTempo">Tempo Estimado</label><input type="text" id="modeloTempo" placeholder="Ex: 5 min">
+            <button type="submit" class="btn" style="width:100%;">💾 Salvar Modelo</button>
+          </form>
+        </div>
+        <div id="listaModelosAdmin"></div>
+      </div>
     </section>
 
     <!-- ===== ABA TAREFAS ESPECIAIS ===== -->
     <section id="especiaisAdmin" class="aba-painel oculto" role="tabpanel">
-      <div id="listaEspeciaisAdmin">
-        <p>Carregando tarefas especiais...</p>
-      </div>
+      <div id="listaEspeciaisAdmin"><p>Carregando tarefas especiais...</p></div>
     </section>
 
-    <!-- ===== ABA UTILIZADORES (SEPARAÇÃO HUMANO/BOT) ===== -->
+    <!-- ===== ABA UTILIZADORES ===== -->
     <section id="utilizadores" class="aba-painel oculto" role="tabpanel">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span></span>
-        <button class="btn btn-sm negro" id="btnExportarRelatorio">📥 Exportar Relatório</button>
-      </div>
-      <div class="abas sub-abas" id="subAbasUtilizadores" role="tablist">
-        <button type="button" class="ativo" data-subaba="humanos" role="tab" aria-selected="true" aria-controls="subHumanos">👤 Humanos</button>
-        <button type="button" data-subaba="botsAdmin" role="tab" aria-selected="false" aria-controls="subBotsAdmin">🤖 Bots</button>
-      </div>
-      <div id="subHumanos" class="subaba-painel" role="tabpanel">
-        <div id="listaHumanos"></div>
-      </div>
-      <div id="subBotsAdmin" class="subaba-painel oculto" role="tabpanel">
-        <div id="listaBotsAdmin"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span></span><button class="btn btn-sm negro" id="btnExportarRelatorio">📥 Exportar Relatório</button></div>
+      <div class="abas sub-abas" id="subAbasUtilizadores"><button type="button" class="ativo" data-subaba="humanos">👤 Humanos</button><button type="button" data-subaba="botsAdmin">🤖 Bots</button></div>
+      <div id="subHumanos" class="subaba-painel"><div id="listaHumanos"></div></div>
+      <div id="subBotsAdmin" class="subaba-painel oculto"><div id="listaBotsAdmin"></div></div>
+    </section>
+
+    <!-- ===== ABA SUB‑GESTORES ===== -->
+    <section id="subgestores" class="aba-painel oculto" role="tabpanel">
+      <h3>🛡️ Gestão de Sub‑Gestores</h3>
+      <div id="listaSubgestores"><p>Carregando sub‑gestores...</p></div>
+      <!-- Modal de permissões (será preenchido via JS) -->
+      <div id="modalPermissoes" class="modal-overlay oculto">
+        <div class="modal-box">
+          <h3>Permissões de <span id="nomeSubgestorModal"></span></h3>
+          <div id="checkboxesPermissoes"></div>
+          <button class="btn" id="btnSalvarPermissoes">💾 Guardar</button>
+          <button class="btn negro" id="btnFecharModal">Cancelar</button>
+        </div>
       </div>
     </section>
 
-    <!-- ===== ABA BOTS (GERENCIAMENTO) ===== -->
+    <!-- ===== ABA BOTS ===== -->
     <section id="bots" class="aba-painel oculto" role="tabpanel">
       <button type="button" class="btn" id="btnGerarBots" style="margin-bottom:20px;">🤖 Gerar Bots Automáticos</button>
-      <div id="formBotsPersonalizados" class="glass oculto">
-        <h3>Gerar Bots Personalizados</h3>
-        <form id="formGerarBots">
-          <label for="quantidadeBots">Quantidade</label>
-          <input type="number" id="quantidadeBots" min="1" max="50" value="5">
-          <button type="submit" class="btn">Gerar</button>
-        </form>
-      </div>
+      <div id="formBotsPersonalizados" class="glass oculto"><h3>Gerar Bots Personalizados</h3><form id="formGerarBots"><label for="quantidadeBots">Quantidade</label><input type="number" id="quantidadeBots" min="1" max="50" value="5"><button type="submit" class="btn">Gerar</button></form></div>
       <div id="listaBots"></div>
     </section>
 
-    <!-- ===== ABA ANÚNCIOS (CRUD COMPLETO) ===== -->
+    <!-- ===== ABA ANÚNCIOS ===== -->
     <section id="anuncios" class="aba-painel oculto" role="tabpanel">
       <button type="button" class="btn" id="btnNovoAnuncio" style="margin-bottom:20px;">➕ Novo Anúncio</button>
       <div id="formAnuncioContainer" class="glass oculto">
         <h3 id="tituloFormAnuncio">Novo Anúncio</h3>
         <form id="formAnuncio">
           <input type="hidden" id="anuncioIdEdit">
+          <label for="modeloAnuncio">Modelo (opcional)</label>
+          <select id="modeloAnuncio">
+            <option value="">— Personalizado —</option>
+            <option value="novaTarefa">📢 Nova tarefa: {titulo}</option>
+            <option value="nivelAtingido">🏆 {nome} atingiu nível {nivel}</option>
+            <option value="novoAplicativo">📱 Novo aplicativo: {nome}</option>
+            <option value="atualizacaoRegras">📜 Regras atualizadas</option>
+            <option value="bonusAtribuido">🎁 Bónus de nível: {nome} ({nivel})</option>
+          </select>
           <label for="anuncioTexto">Texto do Anúncio</label>
           <input type="text" id="anuncioTexto" required>
-          <label for="anuncioLink">Link (interno ou externo)</label>
+          <label for="anuncioLink">Link (opcional)</label>
           <input type="text" id="anuncioLink" placeholder="/pages/tarefas.html ou https://...">
-          <div class="upload-area" id="uploadAnuncioImagem">
-            <span class="icone-upload">🖼️</span>
-            <p>Imagem do anúncio (opcional)</p>
-            <input type="file" id="anuncioImagem" accept="image/*">
-          </div>
-          <label for="anuncioOrdem">Ordem</label>
-          <input type="number" id="anuncioOrdem" min="0" value="0">
-          <div class="checkbox-anuncio">
-            <input type="checkbox" id="anuncioAtivo" checked>
-            <label for="anuncioAtivo">Ativo</label>
-          </div>
+          <div class="upload-area" id="uploadAnuncioImagem"><span class="icone-upload">🖼️</span><p>Imagem do anúncio (opcional)</p><input type="file" id="anuncioImagem" accept="image/*"></div>
+          <label for="anuncioOrdem">Ordem</label><input type="number" id="anuncioOrdem" min="0" value="0">
+          <div class="checkbox-anuncio"><input type="checkbox" id="anuncioAtivo" checked><label for="anuncioAtivo">Ativo</label></div>
           <button type="submit" class="btn" style="width:100%;">💾 Salvar Anúncio</button>
         </form>
       </div>
       <div id="listaAnunciosAdmin"></div>
     </section>
 
-    <!-- ===== ABA DICAS (GESTÃO DE CONTEÚDO) ===== -->
+    <!-- ===== ABA DICAS ===== -->
     <section id="dicasAdmin" class="aba-painel oculto" role="tabpanel">
-      <div class="abas sub-abas" id="subAbasDicasAdmin" role="tablist">
-        <button type="button" class="ativo" data-subaba="appsModeracao" role="tab" aria-selected="true" aria-controls="subAppsModeracao">📱 Aplicativos (Moderação)</button>
-        <button type="button" data-subaba="regrasEditor" role="tab" aria-selected="false" aria-controls="subRegrasEditor">📜 Regras</button>
-        <button type="button" data-subaba="ajudaEditor" role="tab" aria-selected="false" aria-controls="subAjudaEditor">❓ Ajuda</button>
-        <button type="button" data-subaba="reclamacoesAdmin" role="tab" aria-selected="false" aria-controls="subReclamacoesAdmin">📢 Reclamações</button>
+      <div class="abas sub-abas" id="subAbasDicasAdmin">
+        <button type="button" class="ativo" data-subaba="appsModeracao">📱 Aplicativos (Moderação)</button>
+        <button type="button" data-subaba="regrasEditor">📜 Regras</button>
+        <button type="button" data-subaba="ajudaEditor">❓ Ajuda</button>
+        <button type="button" data-subaba="reclamacoesAdmin">📢 Reclamações</button>
       </div>
-      <div id="subAppsModeracao" class="subaba-painel" role="tabpanel">
-        <div id="listaAppsModeracao"></div>
-      </div>
-      <div id="subRegrasEditor" class="subaba-painel oculto" role="tabpanel">
-        <textarea id="editorRegras" rows="12" placeholder="Escreva as regras gerais aqui..."></textarea>
-        <button type="button" class="btn" id="btnSalvarRegras" style="margin-top:10px;">💾 Salvar Regras</button>
-        <div class="checkbox-anuncio" style="margin-top:10px;">
-          <input type="checkbox" id="criarAnuncioRegras">
-          <label for="criarAnuncioRegras">Criar anúncio automaticamente ao salvar</label>
+      <div id="subAppsModeracao" class="subaba-painel"><div id="listaAppsModeracao"></div></div>
+      <div id="subRegrasEditor" class="subaba-painel oculto">
+        <div class="checklist-admin">
+          <div class="checklist-input">
+            <input type="text" id="novaRegraTexto" placeholder="Escreva uma nova regra...">
+            <button class="btn btn-sm" id="btnAdicionarRegra">➕ Adicionar</button>
+          </div>
+          <ul id="listaRegras" class="checklist-regras-admin"></ul>
+          <button class="btn" id="btnSalvarRegras" style="margin-top:15px;">💾 Salvar Regras</button>
+          <div class="checkbox-anuncio" style="margin-top:10px;">
+            <input type="checkbox" id="criarAnuncioRegras"><label for="criarAnuncioRegras">Criar anúncio ao salvar</label>
+          </div>
         </div>
       </div>
-      <div id="subAjudaEditor" class="subaba-painel oculto" role="tabpanel">
+      <div id="subAjudaEditor" class="subaba-painel oculto">
         <textarea id="editorAjuda" rows="12" placeholder="Escreva o conteúdo de ajuda aqui..."></textarea>
-        <button type="button" class="btn" id="btnSalvarAjuda" style="margin-top:10px;">💾 Salvar Ajuda</button>
+        <button class="btn" id="btnSalvarAjuda" style="margin-top:10px;">💾 Salvar Ajuda</button>
       </div>
-      <div id="subReclamacoesAdmin" class="subaba-painel oculto" role="tabpanel">
-        <div id="listaReclamacoesAdmin"></div>
-      </div>
+      <div id="subReclamacoesAdmin" class="subaba-painel oculto"><div id="listaReclamacoesAdmin"></div></div>
     </section>
 
-    <!-- ===== ABA PÁGINAS DINÂMICAS ===== -->
+    <!-- ===== ABA PÁGINAS ===== -->
     <section id="paginas" class="aba-painel oculto" role="tabpanel">
       <button type="button" class="btn" id="btnNovaPagina" style="margin-bottom:20px;">➕ Nova Página</button>
       <div id="formPaginaContainer" class="glass oculto">
         <h3>Editor de Página</h3>
         <form id="formPagina">
           <input type="hidden" id="paginaIdEdit">
-          <label for="paginaTitulo">Título da Página</label>
-          <input type="text" id="paginaTitulo" required>
-          <label for="paginaSlug">Slug (ex: termos, privacidade)</label>
-          <input type="text" id="paginaSlug" required>
-          <label for="paginaConteudo">Conteúdo (HTML permitido)</label>
-          <textarea id="paginaConteudo" rows="12"></textarea>
-          <label>Ou faça upload de um ficheiro HTML</label>
-          <input type="file" id="paginaUpload" accept=".html,.htm">
+          <label for="paginaTitulo">Título da Página</label><input type="text" id="paginaTitulo" required>
+          <label for="paginaSlug">Slug (ex: termos, privacidade)</label><input type="text" id="paginaSlug" required>
+          <label for="paginaConteudo">Conteúdo (HTML permitido)</label><textarea id="paginaConteudo" rows="12"></textarea>
+          <label>Ou faça upload de um ficheiro HTML</label><input type="file" id="paginaUpload" accept=".html,.htm">
           <button type="submit" class="btn" style="width:100%;margin-top:10px;">💾 Salvar Página</button>
         </form>
       </div>
       <div id="listaPaginas"></div>
+    </section>
+
+    <!-- ===== ABA BÓNUS ===== -->
+    <section id="bonus" class="aba-painel oculto" role="tabpanel">
+      <h3>🏆 Bónus de Níveis Pendentes</h3>
+      <div id="listaBonusPendentes"><p>Carregando bónus pendentes...</p></div>
+    </section>
+
+    <!-- ===== ABA MENSAGENS MOTIVACIONAIS ===== -->
+    <section id="mensagens" class="aba-painel oculto" role="tabpanel">
+      <button type="button" class="btn" id="btnNovaMensagem" style="margin-bottom:20px;">➕ Nova Mensagem</button>
+      <div id="formMensagemContainer" class="glass oculto">
+        <h3 id="tituloFormMensagem">Nova Mensagem Motivacional</h3>
+        <form id="formMensagem">
+          <input type="hidden" id="mensagemIdEdit">
+          <label for="mensagemTexto">Texto da mensagem</label>
+          <textarea id="mensagemTexto" rows="4" required></textarea>
+          <label for="mensagemTipo">Tipo</label>
+          <select id="mensagemTipo">
+            <option value="login">Ao entrar no site</option>
+            <option value="periodica">A cada 2 horas</option>
+            <option value="ambos">Ambos</option>
+          </select>
+          <div class="checkbox-anuncio">
+            <input type="checkbox" id="mensagemAtiva" checked><label for="mensagemAtiva">Ativa</label>
+          </div>
+          <button type="submit" class="btn" style="width:100%;">💾 Salvar Mensagem</button>
+        </form>
+      </div>
+      <div id="listaMensagensAdmin"></div>
     </section>
 
     <!-- ===== ABA CONFIGURAÇÕES ===== -->
@@ -237,26 +255,24 @@
       <div class="glass">
         <h3>⚙️ Configurações do Sistema</h3>
         <form id="formConfig">
-          <label for="configWhatsapp">WhatsApp do Suporte</label>
-          <input type="text" id="configWhatsapp" placeholder="+239 994 466 0">
-          <label for="configEmail">Email de Suporte</label>
-          <input type="email" id="configEmail" placeholder="punshiline9@gmail.com">
-          <label for="configManutencao">Modo de Manutenção</label>
-          <select id="configManutencao">
-            <option value="false">Desativado</option>
-            <option value="true">Ativado</option>
-          </select>
+          <label for="configWhatsapp">WhatsApp do Suporte</label><input type="text" id="configWhatsapp" placeholder="+239 994 466 0">
+          <label for="configEmail">Email de Suporte</label><input type="email" id="configEmail" placeholder="punshiline9@gmail.com">
+          <label for="configManutencao">Modo de Manutenção</label><select id="configManutencao"><option value="false">Desativado</option><option value="true">Ativado</option></select>
           <h4 style="margin-top:20px;">Pontos por Nível</h4>
-          <label for="configPontosBronze">Bronze</label>
-          <input type="number" id="configPontosBronze" min="0">
-          <label for="configPontosPrata">Prata</label>
-          <input type="number" id="configPontosPrata" min="0">
-          <label for="configPontosOuro">Ouro</label>
-          <input type="number" id="configPontosOuro" min="0">
-          <label for="configPontosPlatina">Platina</label>
-          <input type="number" id="configPontosPlatina" min="0">
-          <label for="configPontosDiamante">Diamante</label>
-          <input type="number" id="configPontosDiamante" min="0">
+          <label for="configPontosBronze">Bronze</label><input type="number" id="configPontosBronze" min="0">
+          <label for="configPontosPrata">Prata</label><input type="number" id="configPontosPrata" min="0">
+          <label for="configPontosOuro">Ouro</label><input type="number" id="configPontosOuro" min="0">
+          <label for="configPontosPlatina">Platina</label><input type="number" id="configPontosPlatina" min="0">
+          <label for="configPontosDiamante">Diamante</label><input type="number" id="configPontosDiamante" min="0">
+          <h4 style="margin-top:20px;">Bónus por Nível (Kz)</h4>
+          <label for="configBonusBronze">Bronze</label><input type="number" id="configBonusBronze" min="0" value="50">
+          <label for="configBonusPrata">Prata</label><input type="number" id="configBonusPrata" min="0" value="100">
+          <label for="configBonusOuro">Ouro</label><input type="number" id="configBonusOuro" min="0" value="150">
+          <label for="configBonusPlatina">Platina</label><input type="number" id="configBonusPlatina" min="0" value="200">
+          <label for="configBonusDiamante">Diamante</label><input type="number" id="configBonusDiamante" min="0" value="250">
+          <h4 style="margin-top:20px;">Conversão de Pontos</h4>
+          <label for="configTaxaConversao">Taxa (Kz por ponto)</label><input type="number" id="configTaxaConversao" min="0.01" step="0.01" placeholder="0.50">
+          <small style="color:var(--texto-terciario);">Padrão: 0.50 (10 pontos = 5 Kz)</small>
           <h4 style="margin-top:20px;">Métodos de Saque</h4>
           <div class="checkbox-grupo">
             <label><input type="checkbox" id="metodoMulticaixa" checked> Multicaixa Express</label>
@@ -269,43 +285,28 @@
       </div>
     </section>
 
-    <!-- ===== ABA CHAT DO GESTOR (CAIXA DE ENTRADA UNIFICADA) ===== -->
+    <!-- ===== ABA CHAT ===== -->
     <section id="chatAdmin" class="aba-painel oculto" role="tabpanel">
       <div class="chat-admin-layout">
-        <div class="chat-admin-sidebar" id="chatAdminContatos">
-          <p>Carregando conversas...</p>
-        </div>
-        <div class="chat-admin-principal" id="chatAdminMensagens">
-          <p style="color:var(--texto-terciario);text-align:center;">Selecione um contacto para ver a conversa.</p>
-        </div>
+        <div class="chat-admin-sidebar" id="chatAdminContatos"><p>Carregando conversas...</p></div>
+        <div class="chat-admin-principal" id="chatAdminMensagens"><p style="color:var(--texto-terciario);text-align:center;">Selecione um contacto para ver a conversa.</p></div>
       </div>
     </section>
   </main>
 
-  <!-- ========== RODAPÉ ========== -->
   <footer class="creditos">
     <span class="selo-verificado">✔️ Verificado</span>
     © <span id="ano"></span> Pacheco Gonçalves — Todos os direitos reservados.
   </footer>
 
-  <!-- ========== SCRIPTS ========== -->
   <script src="../js/utils.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/admin.js"></script>
   <script>
     document.getElementById('ano').textContent = new Date().getFullYear();
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('../sw.js');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      verificarGestor();
-      // A inicialização das abas e dados fica no admin.js
-    });
-
-    // Logout global
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('../sw.js'); }
+    document.addEventListener('DOMContentLoaded', () => { verificarGestor(); });
     document.getElementById('btnLogout').addEventListener('click', () => logout());
   </script>
 </body>

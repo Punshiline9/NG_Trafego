@@ -527,4 +527,16 @@
   .modal-box {
     padding: 20px;
   }
+}/* ====== SUB‑GESTORES E MODELOS (novas abas) ====== */
+#subModelos, #subgestores {
+  padding-top: 10px;
+}
+
+#subModelos .card-tarefa,
+#subgestores .card-tarefa {
+  background: var(--vidro-claro);
+}
+
+#modeloRapidoContainer {
+  margin-bottom: 20px;
 }
